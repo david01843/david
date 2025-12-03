@@ -1,0 +1,52 @@
+<html lang="en"><!--https://colorscheme.ru/html-colors.html-->
+	<head>
+		<meta charset="UTF-8" name="google" content="notranslate">
+	</head>
+	<style>
+		* {font-family: sans-serif; font-size: 24px;}
+		body {display: flex; flex-direction: column; align-items: center;}
+		button {margin: 8px; padding: 8px 16px;}
+		textarea {text-align: center; width: 90%; background-color: whitesmoke;}
+		p {width: 90%; text-align: center;}
+	</style>
+	<body>
+		<textarea placeholder="key"></textarea>
+		<div><button>forms</button><button>conjugate</button></div>
+		<textarea placeholder="verb"></textarea>
+		<p>asdf</p>
+	</body>
+	<script>
+		//sk-76fbba568be04241b827cf010990058d
+		var ta = document.querySelectorAll("textarea")
+		var b = document.querySelectorAll("button")
+		var p = document.querySelector("p")
+		
+		var q = [
+			"List _'s нсв/св infinitive pair, pair's reflexives, pair's imperatives. no labels, punctuation, or other output",
+			"Is _ нсв or св? If нсв list past and present conjugations. If св list past and future conjugations. no labels, punctuation, or other output"
+		]
+		
+		async function deepseek(i) {
+			b.forEach(j => {j.disabled = true})
+			try {
+		        const response = await fetch("https://api.deepseek.com/chat/completions", {
+		            method: "POST",
+		            headers: {"Content-Type": "application/json", "Authorization": `Bearer ${ta[0].value}`},
+		            body: JSON.stringify({
+		                model: "deepseek-chat", // or "deepseek-coder" for coding
+		                messages: [{role: "user", content: q[i].replace('_', ta[1].value)}],
+		                temperature: 0.1, // Lower for more deterministic responses
+		                max_tokens: 32 // Limit response length
+		            })
+		        })
+		        if (!response.ok) {p.innerHTML = "error"}
+		        const data = await response.json()
+		        p.innerHTML = data.choices[0].message.content.trim()
+		    }
+		    catch (error) {p.innerHTML = error}
+		    b.forEach(j => {j.disabled = false})
+		}
+		b[0].addEventListener("click", () => deepseek(0))
+		b[1].addEventListener("click", () => deepseek(1))
+	</script>
+</html>
