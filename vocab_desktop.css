@@ -1,0 +1,26 @@
+body {
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: repeat(6, auto) 1fr;
+	justify-items: center;
+	font-family: sans-serif;
+}
+#prompt, #answer, #lists, #words {margin: 32px 0 0 0;}
+#lists {margin: 64px 0 0 0;}
+#prompt, #answer {
+	font-size: 64px;
+	height: 64px;
+	text-align: center;
+}
+#prompt {color: gray;}
+#lists p, #controls p, #words p {
+	display: inline-block;
+	margin: 2px;
+	border-radius: 6px;
+	font-size: 12px;
+	padding: 2px 8px;
+}
+#lists p {background-color: lavender; cursor: pointer;}
+#controls p {background-color: thistle; cursor: pointer;}
+#words {text-align: center;}
+#words p {color: gray; background-color: whitesmoke;}

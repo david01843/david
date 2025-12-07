@@ -1,0 +1,24 @@
+body {
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: auto auto 1fr auto auto;
+	justify-items: center;
+	font-family: sans-serif;
+	user-select: none;
+}
+#lists {grid-row: 4}
+#controls {grid-row: 5}
+#prompt, #answer {
+	font-size: 96px;
+	height: 96px;
+	text-align: center;
+}
+#lists p, #controls p {
+	display: inline-block;
+	margin: 2px;
+	border-radius: 6px;
+	font-size: 16px;
+	padding: 2px 8px;
+}
+#lists p {background-color: lavender; cursor: pointer;}
+#controls p {background-color: thistle; cursor: pointer;}

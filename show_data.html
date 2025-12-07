@@ -1,0 +1,27 @@
+<html lang="en"><!--https://htmlcolorcodes.com/color-names/-->
+	<head>
+		<meta charset="UTF-8" name="google" content="notranslate">
+		<style>
+			* {margin: 0}
+		</style>
+	</head>
+	<body></body>
+	<script src="vocab_data.js"></script>
+	<script>
+		b = document.querySelector("body")
+		var p
+		data.forEach(i => {
+			p = document.createElement("p")
+			p.style.margin = "16px"
+			p.innerHTML = i[0]
+			b.appendChild(p)
+			for (j = 1; j < i.length; j += 2) {
+				p = document.createElement("p")
+				p.style.marginLeft = 32
+				p.innerHTML = `${i[j]} ---- ${i[j+1]}`
+				b.appendChild(p)
+			}
+		})
+	</script>
+</html>
+
