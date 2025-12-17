@@ -1,0 +1,45 @@
+<html lang="en"><!--https://colorscheme.ru/html-colors.html-->
+	<head>
+		<meta charset="UTF-8" name="google" content="notranslate">
+		<style>
+			* {margin: 0; user-select: none; font-family: sans-serif;}
+			a, p {font-size: 100px; text-align: center; width: 100%;}
+			a {display: block; color: blue;}
+			p {margin-top: 100px;}
+		</style>
+	</head>
+	<body></body>
+	<script src="vocab_data.js"></script>
+	<script>
+		const b = document.querySelector("body")
+		var p = []
+		var x = new Set()
+		var y = 0
+		data.forEach((i, j) => {
+			var a = document.createElement("a")
+			a.innerHTML = i[0]
+			a.addEventListener("click", () => {
+				data = data[j].slice(1)
+				x = new Set([...Array(data.length/2).keys()])
+				b.innerHTML = ""
+				b.appendChild(document.createElement("p"))
+				b.appendChild(document.createElement("p"))
+				p = document.querySelectorAll("p")
+				cycle()
+			})
+			b.appendChild(a)
+		})
+		function cycle() {
+			if (p[1].innerHTML == "") {
+				p[1].innerHTML = data[2*y+1]
+			} else {
+				var _x = new Set(x)
+				_x.delete(y)
+				y = [..._x][Math.floor(_x.size*Math.random())]
+				p[0].innerHTML = data[2*y]
+				p[1].innerHTML = ""
+			}
+		}
+		b.addEventListener("click", cycle)
+	</script>
+</html>

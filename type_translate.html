@@ -1,0 +1,132 @@
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" name="google" content="notranslate">
+		<style>
+			* {margin: 0; font-family: "Arial"; user-select: none;}
+			body {position: relative; overflow: hidden;}
+			div {
+				position: relative; display: inline-block; margin: 4px 0 0 4px;
+				width: 16px; height: 16px; border: 1px solid black; z-index: 3;
+			}
+			div:hover {cursor: pointer;}
+			canvas {position: absolute; top: 0; left: 0; width: 100%; height: 100%;}
+			canvas:nth-child(1) {z-index: 1;}
+			canvas:nth-child(2) {z-index: 2;}
+			p {
+				position: absolute; display: none; z-index: 2;
+				font-size: 16px; color: blue;
+			}
+		</style>
+	</head>
+	<body>
+		<div></div><div></div><div></div><div></div><div></div><div></div>
+		<canvas></canvas><canvas></canvas>
+		<p></p>
+	</body>
+	<script>
+		// variables
+		const body = document.querySelector("body")
+		const divs = document.querySelectorAll("div")
+		const canvas = document.querySelectorAll("canvas")
+		const p = document.querySelector("p")
+		divs[0].style.backgroundColor = "hsl(60 100% 80%)"
+		divs[1].style.backgroundColor = "hsl(120 100% 85%)"
+		divs[2].style.backgroundColor = "hsl(180 100% 85%)"
+		divs[3].style.backgroundColor = "hsl(240 100% 90%)"
+		divs[4].style.backgroundColor = "hsl(300 100% 90%)"
+		divs[5].style.backgroundColor = "hsl(0 100% 90%)"
+		const ctx = [canvas[0].getContext("2d"), canvas[1].getContext("2d")]
+		window.addEventListener("load", () => {
+			const WIDTH = body.clientWidth; const HEIGHT = body.clientHeight
+			canvas[0].width = WIDTH; canvas[1].width = WIDTH
+			canvas[0].height = HEIGHT; canvas[1].height = HEIGHT
+			canvas[0].style.width = WIDTH+'px'; canvas[1].style.width = WIDTH+'px'
+			canvas[0].style.height = HEIGHT+'px'; canvas[1].style.height = HEIGHT+'px'
+			ctx[0].lineCap = "round"; ctx[1].lineCap = "round"
+			ctx[0].lineJoin = "round"; ctx[1].lineJoin = "round"
+			ctx[0].lineWidth = 64; ctx[1].lineWidth = 64
+			ctx[1].font = "16px Arial"
+		})
+		var drawmode = 0 // 0 = off, 1 = highlight, 2 = erase
+		var drawtime = 0
+		var xy = [0, 0]
+		var color = divs[0].style.backgroundColor
+		
+		// typing
+		async function translate() {
+			var n = [0, 0]
+			for (let i of p.innerHTML.toLowerCase()) {
+				if (/^[a-z]$/.test(i)) {n[0]++}
+				else if (/^[а-яё]$/.test(i)) {n[1]++}
+			}
+			n = (n[0] > n[1]) ? ["en", "ru"] : ["ru", "en"]
+			n = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${n[0]}&tl=${n[1]}&dt=t&q=${encodeURIComponent(p.innerHTML)}`)
+			n = await n.json()
+			return n[0][0][0]
+		}
+		window.addEventListener("keydown", async (e) => {
+			if (e.key.length == 1) {
+				p.innerHTML += e.key
+				p.style.display = "block"; document.body.style.cursor = "none"
+			} else if (e.key == "Backspace") {
+				p.innerHTML = p.innerHTML.slice(0, -1)
+			} else if (e.key == "Enter") {
+				if (e.shiftKey) {
+					await translate()
+					ctx[1].fillText(p.innerHTML, xy[0], xy[1]+14)
+					ctx[1].fillText(await translate(), xy[0], xy[1]-6)
+				} else {
+					ctx[1].fillText(p.innerHTML, xy[0], xy[1]+14)
+				}
+				p.innerHTML = ""
+				p.style.display = "none"; document.body.style.cursor = "default"
+			} else if (e.key == "Escape") {
+				p.innerHTML = ""
+				p.style.display = "none"; document.body.style.cursor = "default"
+			}
+		})
+		
+		// highlight, erase
+		canvas[1].addEventListener("mousedown", () => {
+			if (Date.now()-drawtime > 200) {
+				drawmode = 1
+				ctx[0].fillStyle = color
+			} else {
+				drawmode = 2
+				ctx[0].globalCompositeOperation = "destination-out"
+				ctx[1].globalCompositeOperation = "destination-out"
+			}
+			drawtime = Date.now()
+		})
+		canvas[1].addEventListener("mousemove", (e) => {
+			xy = [e.clientX, e.clientY]
+			p.style.left = xy[0]; p.style.top = xy[1]
+			if (drawmode == 1) {
+				ctx[0].beginPath()
+				ctx[0].moveTo(xy[0], xy[1]+8)
+				ctx[0].lineTo(xy[0], xy[1]-8)
+				ctx[0].lineTo(xy[0]-e.movementX, xy[1]-e.movementY-8)
+				ctx[0].lineTo(xy[0]-e.movementX, xy[1]-e.movementY+8)
+				ctx[0].closePath()
+				ctx[0].fill()
+			} else if (drawmode == 2) {
+				ctx[0].beginPath()
+				ctx[0].moveTo(xy[0], xy[1])
+				ctx[0].lineTo(xy[0]-e.movementX, xy[1]-e.movementY)
+				ctx[0].stroke()
+				ctx[1].beginPath()
+				ctx[1].moveTo(xy[0], xy[1])
+				ctx[1].lineTo(xy[0]-e.movementX, xy[1]-e.movementY)
+				ctx[1].stroke()
+			}
+		})
+		canvas[1].addEventListener("mouseup", () => {
+			drawmode = 0
+			ctx[0].globalCompositeOperation = "source-over"
+			ctx[1].globalCompositeOperation = "source-over"
+		})
+		divs.forEach((div) => {
+			div.addEventListener("click", () => {color = div.style.backgroundColor})
+		})
+	</script>
+</html>
