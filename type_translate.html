@@ -9,7 +9,7 @@
 			canvas:nth-child(2) {z-index: 2;}
 			p {
 				position: absolute; display: none; z-index: 3;
-				font-size: 16px; color: blue;
+				font-size: 14px; color: blue;
 			}
 		</style>
 	</head>
@@ -27,95 +27,99 @@
 			const WIDTH = body.clientWidth; const HEIGHT = body.clientHeight
 			canvas[0].width = WIDTH; canvas[1].width = WIDTH
 			canvas[0].height = HEIGHT; canvas[1].height = HEIGHT
-			canvas[0].style.width = WIDTH+'px'; canvas[1].style.width = WIDTH+'px'
-			canvas[0].style.height = HEIGHT+'px'; canvas[1].style.height = HEIGHT+'px'
+			canvas[0].style.width = WIDTH+"px"; canvas[1].style.width = WIDTH+"px"
+			canvas[0].style.height = HEIGHT+"px"; canvas[1].style.height = HEIGHT+"px"
 			ctx[0].lineCap = "round"; ctx[1].lineCap = "round"
 			ctx[0].lineJoin = "round"; ctx[1].lineJoin = "round"
 			ctx[0].lineWidth = 64; ctx[1].lineWidth = 64
-			ctx[1].font = "16px Arial"
+			ctx[1].font = "14px Arial"
 		})
 		var drawmode = 0 // 0 = off, 1 = highlight, 2 = erase
 		var drawtime = 0
-		var xy = [0, 0]
-		var lasttext = ""
+		var xyd = [0, 0] // set on mousedown
+		var xym = [0, 0] // set on mousemove
+		var hue = 60
+		var t0 = "" // current text
+		var t1 = "" // text history
 		
 		// typing
-		async function translate() {
-			var n = [0, 0]
-			for (let i of p.innerHTML.toLowerCase()) {
+		async function translate(text) {
+			n = [0, 0]
+			for (let i of text.toLowerCase()) {
 				if (/^[a-z]$/.test(i)) {n[0]++}
 				else if (/^[а-яё]$/.test(i)) {n[1]++}
 			}
 			n = (n[0] > n[1]) ? ["en", "ru"] : ["ru", "en"]
-			n = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${n[0]}&tl=${n[1]}&dt=t&q=${encodeURIComponent(p.innerHTML)}`)
+			n = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${n[0]}&tl=${n[1]}&dt=t&q=${encodeURIComponent(text)}`)
 			n = await n.json()
 			return n[0][0][0]
 		}
+		async function drawtext(T) {
+			x = t0.match(/[^.;!?]+[.;!?]?/g) || []; y = 13
+			for (let i of x) {
+				ctx[1].fillText(i.trim(), xym[0], xym[1]+y); y += 16
+				if (T) {ctx[1].fillText(await translate(i), xym[0]+9, xym[1]+y); y += 16}
+			}
+		}
+		function formattext() {
+			x = t0.match(/[^.;!?]+[.;!?]?/g) || []
+			x = x.map(i => i.trim()+"<br>").join("")
+			p.innerHTML = x
+		}
 		window.addEventListener("keydown", async (e) => {
-			console.log(e.key, e.keyCode)
 			if (e.key.length == 1) {
-				p.innerHTML += e.key
+				t0 += e.key; formattext()
 				p.style.display = "block"; document.body.style.cursor = "none"
 			} else if (e.key == "Backspace") {
-				p.innerHTML = p.innerHTML.slice(0, -1)
+				t0 = t0.slice(0, -1); formattext()
 			} else if (e.key == "Enter") {
-				if (e.shiftKey) {
-					await translate()
-					ctx[1].fillText(p.innerHTML, xy[0], xy[1]+14)
-					ctx[1].fillText(await translate(), xy[0], xy[1]-6)
-				} else {
-					ctx[1].fillText(p.innerHTML, xy[0], xy[1]+14)
-				}
-				lasttext = p.innerHTML
-				p.innerHTML = ""
+				drawtext(e.shiftKey, xym[0], xym[1])
+				t1 = t0; t0 = ""; p.innerHTML = ""
 				p.style.display = "none"; document.body.style.cursor = "default"
 			} else if (e.key == "Escape") {
-				p.innerHTML = ""
+				t0 = ""; p.innerHTML = ""
 				p.style.display = "none"; document.body.style.cursor = "default"
 			} else if (e.key == "ArrowUp") {
-				p.innerHTML = lasttext
+				t0 = t1; formattext()
 				p.style.display = "block"; document.body.style.cursor = "none"
 			}
 		})
 		
 		// highlight, erase
-		canvas[1].addEventListener("mousedown", () => {
-			if (Date.now()-drawtime > 200) {
+		canvas[1].addEventListener("mousedown", (e) => {
+			xyd = [e.clientX, e.clientY]
+			if (Date.now()-drawtime > 200) { // highlight
+				ctx[0].fillStyle = `hsl(${hue} 60% 80%)`
+				hue += 60
 				drawmode = 1
-				ctx[0].fillStyle = "hsl(60 100% 60%)"
-			} else {
-				drawmode = 2
+			} else { // erase
 				ctx[0].globalCompositeOperation = "destination-out"
 				ctx[1].globalCompositeOperation = "destination-out"
+				drawmode = 2
 			}
 			drawtime = Date.now()
 		})
 		canvas[1].addEventListener("mousemove", (e) => {
-			xy = [e.clientX, e.clientY]
-			p.style.left = xy[0]; p.style.top = xy[1]
-			if (drawmode == 1) {
-				ctx[0].beginPath()
-				ctx[0].moveTo(xy[0], xy[1]+8)
-				ctx[0].lineTo(xy[0], xy[1]-8)
-				ctx[0].lineTo(xy[0]-e.movementX, xy[1]-e.movementY-8)
-				ctx[0].lineTo(xy[0]-e.movementX, xy[1]-e.movementY+8)
-				ctx[0].closePath()
-				ctx[0].fill()
-			} else if (drawmode == 2) {
-				ctx[0].beginPath()
-				ctx[0].moveTo(xy[0], xy[1])
-				ctx[0].lineTo(xy[0]-e.movementX, xy[1]-e.movementY)
-				ctx[0].stroke()
-				ctx[1].beginPath()
-				ctx[1].moveTo(xy[0], xy[1])
-				ctx[1].lineTo(xy[0]-e.movementX, xy[1]-e.movementY)
-				ctx[1].stroke()
+			xym = [e.clientX, e.clientY]
+			p.style.left = xym[0]; p.style.top = xym[1]
+			if (drawmode == 2) { // erase
+				ctx[0].beginPath(); ctx[0].moveTo(xym[0], xym[1])
+				ctx[0].lineTo(xym[0]-e.movementX, xym[1]-e.movementY); ctx[0].stroke()
+				ctx[1].beginPath(); ctx[1].moveTo(xym[0], xym[1])
+				ctx[1].lineTo(xym[0]-e.movementX, xym[1]-e.movementY); ctx[1].stroke()
 			}
 		})
 		canvas[1].addEventListener("mouseup", () => {
+			if (drawmode == 1) { // highlight
+				ctx[0].beginPath()
+				ctx[0].moveTo(xyd[0]-2, xyd[1]-9); ctx[0].lineTo(xyd[0]-2, xyd[1]+9)
+				ctx[0].lineTo(xym[0]+2, xym[1]+9); ctx[0].lineTo(xym[0]+2, xym[1]-9)
+				ctx[0].closePath(); ctx[0].fill()
+			} else if (drawmode == 2) { // erase
+				ctx[0].globalCompositeOperation = "source-over"
+				ctx[1].globalCompositeOperation = "source-over"
+			}
 			drawmode = 0
-			ctx[0].globalCompositeOperation = "source-over"
-			ctx[1].globalCompositeOperation = "source-over"
 		})
 	</script>
 </html>
