@@ -1,3 +1,4 @@
+// https://david.david01843.deno.net // routing details - production
 var clients = new Set()
 Deno.serve((request) => {
 	if (request.headers.get("upgrade") === "websocket") {
@@ -18,4 +19,5 @@ Deno.serve((request) => {
 		socket.onerror = () => {clients.delete(socket)}
 		return response
 	}
+	return new Response()
 })
