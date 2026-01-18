@@ -55,10 +55,10 @@
 			return n[0][0][0]
 		}
 		async function drawtext(T) {
-			x = t0.match(/[^.;!?]+[.;!?]?/g) || []; y = 13
+			x = t0.match(/[^.;!?]+[.;!?]?/g) || []; y = 13; z = xym
 			for (let i of x) {
-				ctx[1].fillText(i.trim(), xym[0], xym[1]+y); y += 16
-				if (T) {ctx[1].fillText(await translate(i), xym[0]+9, xym[1]+y); y += 16}
+				ctx[1].fillText(i.trim(), z[0], z[1]+y); y += 16
+				if (T) {ctx[1].fillText(await translate(i), z[0]+9, z[1]+y); y += 16}
 			}
 		}
 		function formattext() {
