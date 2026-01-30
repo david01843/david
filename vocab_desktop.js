@@ -1,3 +1,15 @@
+var data = []
+for (i in all_data) { // Object.keys(all_data)
+	x = []
+	x.push(i)
+	for (j in all_data[i]) {
+		k = all_data[i][parseInt(j)]
+		x.push(k["0"]+(k["1sn"] || k["1ma"] || k["inf"] || ""))
+		x.push(k["t"])
+	}
+	data.push(x)
+}
+
 const prompt = document.querySelector("#prompt")
 const answer = document.querySelector("#answer")
 const lists = document.querySelector("#lists")
