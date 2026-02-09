@@ -3,73 +3,91 @@
 <meta charset="UTF-8" name="google" content="notranslate">
 <style>
 	* {margin: 0; user-select: none; font-family: sans-serif;}
-	h1 {font-size: 96px;}
-	h3, h4 {
-		display: flex; align-items: center; text-align: center; justify-content: center; padding: 16px;
-		height: 25%; font-size: 48px; margin: 16px; border-radius: 32px; background-color: gainsboro;
+	h1 {font-size: 128px;}
+	h2 {
+		display: none; width: calc(100% - 64px); font-size: 64px; padding: 0 16px;
+		justify-content: center; align-items: center; text-align: center; margin: 16px 16px 0 16px;
 	}
-	h4 {height: 96px; width: 192px; margin: 0 auto; font-size: 32px;}
-	p {position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 32px;}
+	h2:nth-child(1) {height: 192px; background-color: lightgreen;}
+	h2:nth-child(2) {height: 256px; background-color: paleturquoise;}
+	#grid {
+		display: none; gap: 16px; margin: 16px;
+		grid-template-columns: repeat(7, 1fr);
+	}
+	#grid div h3{
+		background-color: plum; text-align: center;
+		font-size: 32px; line-height: 64px; margin-bottom: 16px;
+	}
 </style>
 </head>
-<body><p></p></body>
+<body>
+	<h2>asdf</h2><h2>asdf2</h2>
+	<div id="grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+</body>
 <script src="a1a2db.js"></script>
 <script>
-	const b = document.querySelector("body")
-	const p = document.querySelector("p")
-	var h3 = []
-	var words = []; var w = -1
-	var card1 = []; var c1 = -1
-	var card2 = []; var c2 = -1
-	var base = ""
-	
-	function turncard1() {
-		c1 = (c1+1)%card1.length
-		h3[0].innerHTML = card1[c1]
-	}
-	function turncard2() {
-		c2 = (c2+1)%card2.length
-		h3[1].innerHTML = card2[c2]
-	}
-	function next() {
-		w = (w+1)%words.length
-		base = words[w][0]
-		card1 = [base+(words[w]["1sn"] || "")+(words[w]["1ma"] || "")+(words[w]["inf"] || ""), words[w]["t"]]
-		c1 = -1
-		var c2temp = {...words[w]}
-		delete c2temp.t
-		delete c2temp[0]
-		c2temp = Object.entries(c2temp).sort(() => Math.random()-.5)
-		card2 = []
-		console.log(c2temp)
-		Object.values(c2temp).forEach((v) => {
-			card2.push(labels[v[0]])
-			card2.push(base+v[1])
-		})
-		c2 = -1
-		turncard1()
-		turncard2()
-		p.innerHTML = `${w+1} / ${words.length}`
-	}
-	
-	// init
+	const body = document.querySelector("body")
+	const h2 = document.querySelectorAll("h2")
+	const grid = document.querySelector("#grid")
+	const divs = document.querySelectorAll("#grid div")
+	var words = []
+	var w = -1
+	var w0 = ""
 	for (const i of Object.keys(all_data)) {
 		const h1 = document.createElement("h1")
 		h1.innerHTML = i
 		h1.addEventListener("click", () => {
 			words = all_data[i].sort(() => Math.random()-.5)
-			h3 = [document.createElement("h3"), document.createElement("h3")]
-			h3[0].addEventListener("click", turncard1)
-			h3[1].addEventListener("click", turncard2)
-			b.appendChild(h3[0]); b.appendChild(h3[1])
-			const h4 = document.createElement("h4")
-			h4.innerHTML = "next"
-			h4.addEventListener("click", next)
-			b.appendChild(h4)
+			h2.forEach((j) => {j.style.display = "flex"})
+			h2[0].addEventListener("click", () => next())
+			h2[1].addEventListener("click", () => h2[1].innerHTML = words[w]["t"])
+			grid.style.display = "grid"
 			next()
-			document.querySelectorAll("h1").forEach(h1 => h1.remove())
+			document.querySelectorAll("h1").forEach(k => k.remove())
 		})
-		b.appendChild(h1)
+		body.appendChild(h1)
+	}
+	
+	function next() {
+		w = (w+1)%words.length
+		w0 = words[w][0]
+		h2[1].innerHTML = ""
+		document.querySelectorAll("h3").forEach(k => k.remove())
+		if (words[w].hasOwnProperty("1sn")) { // noun
+			h2[0].innerHTML = words[w][0]+words[w]["1sn"]
+			h3("1sn", 0); h3("1pn", 0)
+			h3("2sn", 1); h3("2pn", 1)
+			h3("3sn", 2); h3("3pn", 2)
+			h3("4sn", 3); h3("4pn", 3)
+			h3("5sn", 4); h3("5pn", 4)
+			h3("6sn", 5); h3("6pn", 5)
+		} else if (words[w].hasOwnProperty("1ma")) { // adjective
+			h2[0].innerHTML = words[w][0]+words[w]["1ma"]
+			h3("1ma", 0); h3("1fa", 0); h3("1na", 0); h3("1pa", 0)
+			h3("2ma", 1); h3("2fa", 1); h3("2na", 1); h3("2pa", 1)
+			h3("3ma", 2); h3("3fa", 2); h3("3na", 2); h3("3pa", 2)
+			h3("4ma", 3); h3("4fa", 3); h3("4na", 3); h3("4pa", 3)
+			h3("5ma", 4); h3("5fa", 4); h3("5na", 4); h3("5pa", 4)
+			h3("6ma", 5); h3("6fa", 5); h3("6na", 5); h3("6pa", 5)
+			h3("adv", 6); h3("msf", 6); h3("fsf", 6); h3("nsf", 6); h3("psf", 6)
+		} else if (words[w].hasOwnProperty("inf")) { // verb
+			h2[0].innerHTML = words[w][0]+words[w]["inf"]
+			h3("mpa", 0); h3("fpa", 0); h3("npa", 0); h3("ppa", 0)
+			h3("1pr", 1); h3("2pr", 1); h3("3pr", 1); h3("4pr", 1); h3("5pr", 1); h3("6pr", 1)
+			h3("1fu", 2); h3("2fu", 2); h3("3fu", 2); h3("4fu", 2); h3("5fu", 2); h3("6fu", 2)
+			h3("sii", 3); h3("pfi", 3)
+		} else {
+			h2[0].innerHTML = words[w][0]
+		}
+	}
+	function show(x) {h2[1].innerHTML = words[w][0]+words[w][x]}
+	function h3(x, d) {
+		if (words[w].hasOwnProperty(x)) {
+			const h = document.createElement("h3")
+			h.innerHTML = x
+			h.addEventListener("click", () => show(x))
+			divs[d].appendChild(h)
+		}
 	}
 </script>
 </html>
