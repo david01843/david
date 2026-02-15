@@ -86,7 +86,17 @@
 		if (i != -1) {h1[0].innerHTML += (i == 32 && e.shiftKey) ? "," : kchar[i]}
 		else if (e.keyCode == 8) {h1[0].innerHTML = h1[0].innerHTML.slice(0, -1)} // backspace
 		else if (e.keyCode == 13) { // enter
-			if (h1[0].innerHTML.trim() == h1[1].innerHTML.trim()) {next()}
+			h10 = h1[0].innerHTML.trim()
+			h11 = h1[1].innerHTML.trim()
+			let j
+			for (j = 0; j < Math.min(h10.length, h11.length); j++) {
+				if (h10[j] != h11[j]) {break}
+			}
+			if (h10 == h11) {next()}
+			else if (j < h10.length) {h1[0].innerHTML = h10.slice(0, j)}
+			else if (h11[j] == " ") {p[kchar.indexOf(h11[j+1])].style.color = "black"}
+			else if (h11[j] == ",") {p[32].style.color = "black"}
+			else {p[kchar.indexOf(h11[j])].style.color = "black"}
 		}
 		else if (e.keyCode == 32) {h1[0].innerHTML += " "} // space
 	})
