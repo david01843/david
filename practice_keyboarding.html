@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><!--https://colorscheme.ru/html-colors.html-->
+<head>
+	<meta charset="UTF-8" name="google" content="notranslate">
+	<style>
+		* {margin: 0; fuser-select: none; font-family: "DejaVu Sans";}
+		body {display: flex; flex-direction: column; justify-content: center; align-items: center;}
+		#level {display: flex; width: calc(100vw - 4px); margin: 2px 2px 32px 2px;}
+		a {
+			display: flex; flex: 1 0 auto; justify-content: center;
+			margin: 2px; border-radius: 4px; padding: 2px 0; font-size: 14px;
+		}
+		#keyrow1, #keyrow2, #keyrow3 {display: flex;}
+		#keyrow2, #keyrow3 {margin-right: 16px;}
+		p {
+			display: inline-block; width: 32px; height: 32px; line-height: 32px;
+			margin: 2px; text-align: center; font-size: 18px; border-radius: 4px;
+		}
+		h1 {font-size: 32px; height: 32px; font-weight: normal; margin-top: 16px;}
+	</style>
+</head>
+<body>
+	<div id="level"><a>фываолдж</a><a>енприт</a><a>кгмь</a><a>ушсб</a><a>цщчю</a><a>йзя.,</a><a>ёхэъ</a></div>
+	<div id="keyrow1"><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p></div>
+	<div id="keyrow2"><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p></div>
+	<div id="keyrow3"><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p></div>
+	<h1></h1>
+	<h1 style="color: silver;">asdf</h1>
+</body>
+<script>
+	const data = [['да', 'вы', 'во', 'до', 'ож', 'вал', 'вода', 'два', 'овал', 'ложа', 'жало', 'вдова', 'довод', 'ввод', 'вывод', 'лад', 'жажда'], ['нет', 'не', 'ни', 'и', 'тип', 'пир', 'мир', 'ритм', 'принт', 'три', 'пент', 'пинта', 'тире', 'пер', 'рен', 'интер', 'при', 'пре', 'тери', 'пирит', 'терпи', 'пинет', 'трен', 'принтер', 'тернии'], ['кот', 'том', 'мир', 'год', 'дом', 'кто', 'где', 'молоко', 'море', 'гора', 'кит', 'тигр', 'гром', 'парк', 'март', 'рамка', 'нитка', 'корм', 'пот', 'рот', 'род', 'дар', 'рад', 'мода', 'рак', 'пар', 'тик', 'маг'], ['суп', 'бус', 'шум', 'душ', 'муж', 'шуба', 'бум', 'сушка', 'буш', 'дума', 'сумка', 'шумно', 'дуб', 'суд', 'бусы', 'шут', 'мусор', 'сум', 'бушу'], ['чум', 'чуб', 'щуп', 'чудо', 'сучок', 'брюква', 'жюри', 'тюк', 'пюре', 'дюна', 'рюмка', 'сюжет', 'бюст', 'чтиво', 'бюджет', 'чушка'], ['я', 'зя', 'ай', 'ой', 'ей', 'яй', 'зоя', 'рай', 'май', 'мой', 'твой', 'свой', 'яма', 'язык', 'мороз', 'заяц', 'яйцо', 'злой', 'синий', 'новый', 'старый', 'зима', 'земля', 'яблоко', 'язва', 'пояс', 'союз', 'раз', 'газ', 'таз', 'тазы'], ['эх', 'ох', 'ах', 'ух', 'это', 'эти', 'эра', 'мэр', 'сэр', 'пэр', 'хор', 'хор', 'год', 'ещё', 'ёж', 'ёлка', 'моё', 'твоё', 'своё', 'всё', 'один', 'хлеб', 'холод', 'хорошо', 'плохо', 'тихо', 'сухо', 'эхо', 'поэт', 'дуэт', 'кафе', 'кофе', 'ъезд', 'объём', 'подъём', 'разъём', 'съёмка', 'съезд', 'въезд', 'выезд', 'объект', 'субъект', 'инъекция']]
+	var d = []
+	const a = document.querySelectorAll("a")
+	const p = document.querySelectorAll("p")
+	const h1 = document.querySelectorAll("h1")
+	var active = ""
+	var hint = true
+	
+	var x = ""
+	a.forEach((i, j) => {
+		let y = x+i.innerHTML.replace(',', '')
+		z = 200*(1-j/(a.length-1))
+		i.style.backgroundColor = `hsl(${z}, 100%, 80%)`
+		i.addEventListener("click", () => {d = data[j]; colorkeys(y); labelkeys(); showkeys(); next()})
+		x = y
+	})
+	kchar = "йцукенгшщзхъфывапролджэячсмитьбю.ё"
+	p.forEach((i, j) => {i = kchar[j]})
+	kcode = [81, 87, 69, 82, 84, 89, 85, 73, 79, 80, 219, 221,
+		65, 83, 68, 70, 71, 72, 74, 75, 76, 186, 222,
+		90, 88, 67, 86, 66, 78, 77, 188, 190, 191, 192] // ё = 192
+	function colorkeys(x) {
+		active = x
+		p.forEach((i, j) => {i.style.backgroundColor = active.includes(kchar[j]) ? "thistle" : "#eee"})
+		for (i of [12, 13, 14, 15, 18, 19, 20, 21]) {p[i].style.backgroundColor = "lightsteelblue"}
+	} colorkeys("фываолдж")
+	function labelkeys() {
+		p.forEach((i, j) => {i.innerHTML = (i.style.backgroundColor == "rgb(238, 238, 238)") ? "" : kchar[j]})
+	} labelkeys()
+	function showkeys() {p.forEach((i) => {i.style.color = "black"; hint = true})}
+	function hidekeys() {p.forEach((i) => {i.style.color = i.style.backgroundColor; hint = false})}
+	function next() {
+		d.sort(() => Math.random()-.5)
+		h1[0].innerHTML = ""
+		h1[1].innerHTML = ""
+		x = 0
+		while (h1[1].innerHTML.length < 32) {
+			h1[1].innerHTML += d[x]
+			if (active.includes(".")) {
+				if (Math.random() < .2) {h1[1].innerHTML += "."}
+				else if (Math.random() < .4) {h1[1].innerHTML += ","}
+			}
+			h1[1].innerHTML += " "
+			x++
+		}
+	}
+	
+	document.addEventListener("keydown", (e) => {
+		i = kcode.indexOf(e.keyCode)
+		if (i != -1) {h1[0].innerHTML += (i == 32 && e.shiftKey) ? "," : kchar[i]}
+		else if (e.keyCode == 8) {h1[0].innerHTML = h1[0].innerHTML.slice(0, -1)} // backspace
+		else if (e.keyCode == 13) { // enter
+			if (h1[0].innerHTML.trim() == h1[1].innerHTML.trim()) {next()}
+		}
+		else if (e.keyCode == 32) {h1[0].innerHTML += " "} // space
+	})
+	document.querySelector("#keyrow1").addEventListener("click", () => hint ? hidekeys() : showkeys())
+	document.querySelector("#keyrow2").addEventListener("click", () => hint ? hidekeys() : showkeys())
+	document.querySelector("#keyrow3").addEventListener("click", () => hint ? hidekeys() : showkeys())
+</script>
+</html>
