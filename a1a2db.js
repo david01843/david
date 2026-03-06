@@ -1172,5 +1172,32 @@ const all_data = {
 		{"t": "tin (latin, formula)", "0": "станнум"},
 		{"t": "tin (common name)", "0": "олово"},
 		{"t": "zinc", "0": "цинк"}
+	],
+	"engr7": [
+		{"t": "испарение", "0": "evaporation"},
+		{"t": "отвердевание", "0": "solidification, hardening"},
+		{"t": "конденсат", "0": "condensate"},
+		{"t": "конденсация", "0": "condensation"},
+		{"t": "определённой", "0": "definite, specific"},
+		{"t": "кипеть", "0": "to boil"},
+		{"t": "плавиться", "0": "to melt"},
+		{"t": "превращаться", "0": "to turn into, transform"},
+		{"t": "превращение", "0": "transformation, conversion"},
+		{"t": "переходить", "0": "to transition, cross over, pass into"},
+		{"t": "пар", "0": "steam, vapor"},
+		{"t": "изменяться", "0": "to change, alter"},
+		{"t": "изменение", "0": "change, alteration"},
+		{"t": "гореть", "0": "to burn"},
+		{"t": "горение", "0": "combustion, burning"},
+		{"t": "вычитать", "0": "to subtract, deduct"},
+		{"t": "сложить", "0": "to add, fold, put together"},
+		{"t": "образоваться", "0": "to form, be formed"},
+		{"t": "любой", "0": "any, either, whatever"},
+		{"t": "явление", "0": "phenomenon, occurrence"},
+		{"t": "объём", "0": "volume, capacity"},
+		{"t": "состав", "0": "composition, structure"},
+		{"t": "нагревать", "0": "to heat up"},
+		{"t": "реакция", "0": "reaction"},
+		{"t": "употребить", "0": "to use, consume, apply"}
 	]
 }
