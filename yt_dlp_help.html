@@ -1,0 +1,43 @@
+<html lang="en"><!--https://colorscheme.ru/html-colors.html-->
+	<head>
+		<meta charset="UTF-8" name="google" content="notranslate">
+	</head>
+	<style>
+		* {margin: 8px; user-select: none; font-family: monospace;}
+		p {
+			width: calc(100% - 32px); height: 100px; font-size: 20px;
+			background-color: #ddd; padding: 4px 8px; word-break: break-all;
+		}
+		button {padding: 16px 32px; font-size: 20px;}
+		h2 {color: gray; font-weight: normal;}
+	</style>
+	<body>
+		<h1>Paste URL here:</h1>
+		<p></p>
+		<h1>Form command:</h1>
+		<button>yt-dlp -F</button>
+		<button>yt-dlp -f bestaudio</button>
+		<button>yt-dlp</button>
+		<h1>Command written to clipboard:</h1>
+		<p></p>
+		<h2>
+			Other Termux commands:<br>
+			pkg update && pkg upgrade<br>
+			pkg install yt-dlp (takes a long time)<br>
+			pkg upgrade yt-dlp
+		</h2>
+	</body>
+	<script>
+		p = document.querySelectorAll("p")
+		p[0].addEventListener("click", () => {
+			navigator.clipboard.readText().then(x => {p[0].innerHTML = x})
+		})
+		document.querySelectorAll("button").forEach(e => {
+			e.addEventListener("click", () => {
+				let y = `${e.innerHTML} "${p[0].innerHTML}"`
+				navigator.clipboard.writeText(y)
+				p[1].innerHTML = y
+			})
+		})
+	</script>
+</html>
