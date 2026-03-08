@@ -5,11 +5,12 @@
 	<style>
 		* {font-family: sans-serif; user-select: none; margin: 0;}
 		body {display: flex; flex-direction: column; align-items: center;}
-		#prompt {margin-top: 32px; font-size: 48px; height: 48px; color: gray;}
-		#answer {margin-top: 32px; font-size: 64px; height: 64px; color: black;}
+		#prompt {margin-top: 32px; font-size: 32px; height: 32px; color: gray;}
+		#answer {margin-top: 16px; font-size: 64px; height: 64px; color: black;}
 		#words, #lists, #pages {font-size: 12px;}
-		#words {margin-top: 48px; display: grid; grid-template-rows: repeat(10, auto); grid-auto-flow: column;}
-		#words p {margin: 0 2px; width: 300px; height: 24px; line-height: 24px; text-align: center;}
+		#words {margin-top: 64px; display: grid; grid-template-rows: repeat(10, auto); grid-auto-flow: column;}
+		#words p {width: 300px; height: 24px; line-height: 24px; text-align: center; background-color: #eee;}
+		#words p.active {background-color: #bce;}
 		#lists p, #pages p {display: inline-block; padding: 2px 8px; margin: 0 2px;}
 		#lists p {background-color: #adb; margin-top: 16px;}
 		#pages p {background-color: #dbb; margin-top: 4px;}
@@ -25,26 +26,17 @@
 		
 		const chars = "ё1234567890-=йцукенгшщзхъ\\фывапролджэячсмитьбю,"
 		const codes = [192, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 189, 187, 81, 87, 69, 82, 84, 89, 85, 73, 79, 80, 219, 221, 220, 65, 83, 68, 70, 71, 72, 74, 75, 76, 186, 222, 90, 88, 67, 86, 66, 78, 77, 188, 190, 191]
-		var data = {}
 		var audio = new SpeechSynthesisUtterance() // requires Google Chrome, not Vanadium
 		audio.lang = "ru"
 		var mousedown = false
+		var current = null
 		
-		function toggle(e) { // toggle word presence in set
-			mousedown = true
-			if (e.target.style.backgroundColor == "rgb(187, 204, 238)") { // #bce
-				data.delete(e.target.metadata)
-				e.target.style.backgroundColor = "#eee"
-			} else {
-				data.add(e.target.metadata)
-				e.target.style.backgroundColor = "#bce"
-			}
-		}
+		function flip(e) {mousedown = true; e.target.classList.toggle("active")}
 		function check() {
-			if (answer.innerHTML == answer.metadata) {
+			if (answer.innerHTML == answer.dataset.metadata) {
 				answer.style.color = "limegreen"
 				speechSynthesis.speak(audio)
-			} else if (answer.innerHTML != answer.metadata.slice(0, answer.innerHTML.length)) {
+			} else if (answer.innerHTML != answer.dataset.metadata.slice(0, answer.innerHTML.length)) {
 				answer.style.color = "red"
 			} else {
 				answer.style.color = "black"
@@ -52,17 +44,19 @@
 		}
 		function cycle() {
 			speechSynthesis.cancel()
-			if (data.size > 1) {
-				let x = new Set(data)
-				x.delete(`${prompt.innerHTML}|${answer.metadata}`)
-				x = Array.from(x)[Math.floor(Math.random()*x.size)].split("|")
-				prompt.innerHTML = x[0]
-				answer.metadata = x[1]
-				audio.text = answer.metadata
-			} else if (data.size == 0) {
+			let x = Array.from(document.querySelectorAll("#words p.active"))
+			if (x.length == 0) {
 				prompt.innerHTML = ""
-				answer.metadata = ""
+				answer.dataset.metadata = ""
 				audio.text = ""
+				current = null
+			} else if (x.length > 0) {
+				x.sort(() => Math.random()-.5)
+				x = (x.length > 1 && x[0] == current) ? x[1] : x[0]
+				prompt.innerHTML = x.innerHTML
+				answer.dataset.metadata = x.dataset.metadata
+				audio.text = x.dataset.metadata
+				current = x
 			}
 			answer.innerHTML = ""
 			answer.style.color = "black"
@@ -72,10 +66,10 @@
 			else if (e.keyCode == 8) {answer.innerHTML = answer.innerHTML.slice(0, -1); check()}
 			else if (e.keyCode == 13) {
 				if (answer.style.color == "limegreen") {
-					if (e.shiftKey) {data.delete(`${prompt.innerHTML}|${answer.metadata}`)}
+					if (e.shiftKey) current.classList.remove("active")
 					cycle()
 				}
-				else {answer.innerHTML = answer.metadata; check()}
+				else {answer.innerHTML = answer.dataset.metadata; check()}
 			}
 			else if (e.keyCode == 32) {answer.innerHTML += " "; check()}
 		})
@@ -98,23 +92,22 @@
 					let b = document.createElement("p") // page
 					b.innerHTML = `page ${j+1}`
 					b.addEventListener("click", () => {
-						data = new Set(z)
 						words.innerHTML = ""
 						words.style.gridTemplateColumns = `repeat(${Math.ceil(z.length/10)}, auto)`
 						for (let k of z) {
 							let c = document.createElement("p") // word
-							c.innerHTML = k.split("|")[0]
-							c.metadata = k
-							c.style.backgroundColor = "#bce"
-							c.addEventListener("mousedown", toggle)
-							c.addEventListener("mouseenter", (e) => {if (mousedown) {toggle(e)}})
+							c.innerHTML = k.split("|")[1]
+							c.dataset.metadata = k.split("|")[0]
+							c.classList.add("active")
+							c.addEventListener("mousedown", flip)
+							c.addEventListener("mouseenter", (e) => {if (mousedown) {flip(e)}})
 							words.appendChild(c)
 						}
+						cycle()
 					})
 					pages.appendChild(b)
 				}
 				document.querySelector("#pages p").click()
-				cycle()
 			})
 			lists.appendChild(a)
 		}
