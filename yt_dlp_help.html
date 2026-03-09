@@ -15,17 +15,19 @@
 		<h1>Paste URL here:</h1>
 		<p></p>
 		<h1>Form command:</h1>
-		<button>yt-dlp -F</button>
-		<button>yt-dlp -f bestaudio</button>
-		<button>yt-dlp</button>
+		<button>yt-dlp -f "worst"</button>
+		<button>mv *.mp4 /sdcard/Download/</button>
 		<h1>Command written to clipboard:</h1>
 		<p></p>
 		<h2>
-			Other Termux commands:<br>
+			Other notes:<br>
 			pkg update && pkg upgrade<br>
 			pkg install yt-dlp (takes a long time)<br>
 			pkg upgrade yt-dlp<br>
-			yt-dlp "https://rutube.ru/video/750a5bf3e07eb57e4034b02053250a88/"
+			yt-dlp "https://rutube.ru/video/750a5bf3e07eb57e4034b02053250a88/"<br>
+			pwd<br>
+			ls -la<br>
+			mv *.mp4 /sdcard/Download/
 		</h2>
 	</body>
 	<script>
@@ -33,12 +35,16 @@
 		p[0].addEventListener("click", () => {
 			navigator.clipboard.readText().then(x => {p[0].innerHTML = x})
 		})
-		document.querySelectorAll("button").forEach(e => {
-			e.addEventListener("click", () => {
-				let y = `${e.innerHTML} "${p[0].innerHTML}"`
-				navigator.clipboard.writeText(y)
-				p[1].innerHTML = y
-			})
+		b = document.querySelectorAll("button")
+		b[0].addEventListener("click", () => {
+			let y = `${b[0].innerHTML} "${p[0].innerHTML}"`
+			navigator.clipboard.writeText(y)
+			p[1].innerHTML = y
+		})
+		b[1].addEventListener("click", () => {
+			let y = b[1].innerHTML
+			navigator.clipboard.writeText(y)
+			p[1].innerHTML = y
 		})
 	</script>
 </html>
