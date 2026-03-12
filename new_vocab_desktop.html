@@ -96,8 +96,8 @@
 						words.style.gridTemplateColumns = `repeat(${Math.ceil(z.length/10)}, auto)`
 						for (let k of z) {
 							let c = document.createElement("p") // word
-							c.innerHTML = k.split("|")[1]
-							c.dataset.metadata = k.split("|")[0]
+							c.innerHTML = k.split("|")[0]
+							c.dataset.metadata = k.split("|")[1]
 							c.classList.add("active")
 							c.addEventListener("mousedown", flip)
 							c.addEventListener("mouseenter", (e) => {if (mousedown) {flip(e)}})
