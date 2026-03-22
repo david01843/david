@@ -4,47 +4,36 @@
 	</head>
 	<style>
 		* {margin: 8px; font-family: monospace;}
-		p {
-			width: calc(100% - 32px); height: 100px; font-size: 20px;
-			background-color: #ddd; padding: 4px 8px; word-break: break-all;
-		}
 		button {padding: 16px 32px; font-size: 20px;}
-		h2 {color: gray; font-weight: normal;}
 	</style>
 	<body>
-		<h1>Paste URL here:</h1>
-		<p></p>
-		<h1>Form command:</h1>
-		<button>yt-dlp -f "worst"</button>
-		<button>mv *.mp4 /sdcard/Download/</button>
-		<h1>Command written to clipboard:</h1>
-		<p></p>
-		<h2>
-			Other notes:<br>
-			pkg update && pkg upgrade<br>
-			pkg install yt-dlp (takes a long time)<br>
-			pkg upgrade yt-dlp<br>
-			yt-dlp "https://rutube.ru/video/750a5bf3e07eb57e4034b02053250a88/"<br>
-			pwd<br>
-			ls -la<br>
-			mv *.mp4 /sdcard/Download/
-		</h2>
+		<button style="font-weight: bold;">! FORM COMMAND !</button>
+		<button>remove last</button>
+		<button style="color: blue;">+ add url +</button>
+		<!--pkg update && pkg upgrade
+		pkg install yt-dlp (takes a long time)
+		pkg upgrade yt-dlp
+		yt-dlp "https://rutube.ru/video/750a5bf3e07eb57e4034b02053250a88/"
+		pwd
+		ls -la-->
 	</body>
 	<script>
-		p = document.querySelectorAll("p")
-		p[0].addEventListener("click", () => {
-			navigator.clipboard.readText().then(x => {p[0].innerHTML = x})
-		})
+		body = document.querySelector("body")
 		b = document.querySelectorAll("button")
 		b[0].addEventListener("click", () => {
-			let y = `${b[0].innerHTML} "${p[0].innerHTML}"`
+			let y = "urls=("
+			for (p of document.querySelectorAll("p")) {y += ` "${p.innerHTML}"`}
+			y += '); for i in "${urls[@]}"; do yt-dlp -f "worst" "$i" || true; done && mv *.mp4 /sdcard/Download/'
 			navigator.clipboard.writeText(y)
-			p[1].innerHTML = y
 		})
 		b[1].addEventListener("click", () => {
-			let y = b[1].innerHTML
-			navigator.clipboard.writeText(y)
-			p[1].innerHTML = y
+			ps = document.querySelectorAll("p")
+			ps[ps.length-1].remove()
+		})
+		b[2].addEventListener("click", () => {
+			let p = document.createElement("p")
+			navigator.clipboard.readText().then(x => {p.innerHTML = x})
+			body.appendChild(p)
 		})
 	</script>
 </html>
