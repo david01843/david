@@ -8,8 +8,8 @@
 		#prompt {margin-top: 32px; font-size: 32px; height: 32px; color: gray;}
 		#answer {margin-top: 16px; font-size: 64px; height: 64px; color: black;}
 		#words, #lists, #pages {font-size: 12px;}
-		#words {margin-top: 64px; display: grid; grid-template-rows: repeat(10, auto); grid-auto-flow: column;}
-		#words p {width: 300px; height: 24px; line-height: 24px; text-align: center; background-color: #eee;}
+		#words {margin-top: 64px; display: grid; grid-template-rows: repeat(10, auto); grid-auto-flow: column; grid-gap: 2px;}
+		#words p {width: 24px; height: 24px; line-height: 24px; text-align: center; background-color: #eee;}
 		#words p.active {background-color: #bce;}
 		#lists p, #pages p {display: inline-block; padding: 2px 8px; margin: 0 2px;}
 		#lists p {background-color: #adb; margin-top: 16px;}
@@ -53,9 +53,9 @@
 			} else if (x.length > 0) {
 				x.sort(() => Math.random()-.5)
 				x = (x.length > 1 && x[0] == current) ? x[1] : x[0]
-				prompt.innerHTML = x.innerHTML
-				answer.dataset.metadata = x.dataset.metadata
-				audio.text = x.dataset.metadata
+				prompt.innerHTML = x.dataset.metadata.split("|")[0]//innerHTML
+				answer.dataset.metadata = x.dataset.metadata.split("|")[1]
+				audio.text = x.dataset.metadata.split("|")[1]
 				current = x
 			}
 			answer.innerHTML = ""
@@ -82,7 +82,7 @@
 				x.push(y["t"]+"|"+y["0"]+(y["1sn"] || y["1ma"] || y["inf"] || ""))
 			}
 			x.sort(() => Math.random()-.5)
-			let n = Math.ceil(x.length/40) // number of pages for 10 rows, max 4 columns
+			let n = Math.ceil(x.length/999) // number of pages for 10 rows, max 4 columns
 			let a = document.createElement("p") // list
 			a.innerHTML = i
 			a.addEventListener("click", () => {
@@ -96,8 +96,8 @@
 						words.style.gridTemplateColumns = `repeat(${Math.ceil(z.length/10)}, auto)`
 						for (let k of z) {
 							let c = document.createElement("p") // word
-							c.innerHTML = k.split("|")[0]
-							c.dataset.metadata = k.split("|")[1]
+							//c.innerHTML = k.split("|")[0]
+							c.dataset.metadata = k//.split("|")[1]
 							c.classList.add("active")
 							c.addEventListener("mousedown", flip)
 							c.addEventListener("mouseenter", (e) => {if (mousedown) {flip(e)}})
