@@ -47,6 +47,7 @@
 			<a style="color: gray;" href="https://tradingview.com/symbols/USDRUB/">Ruble</a>
 		</div>
 		<div>
+			<a style="color: white" href="">Open URL</a>
 			<a style="color: red" href="https://www.youtube.com/">Youtube</a>
 			<a style="color: plum" href="new_vocab_mobile.html">Vocab for Mobile</a>
 			<a style="color: plum" href="show_data.html">Show Data</a>
@@ -56,5 +57,11 @@
 	</body>
 	<script>
 		document.querySelectorAll("a").forEach(i => {i.target = "_blank"})
+		divs = document.querySelectorAll("div:nth-child(2)")
+		console.log(divs[0].children)
+		divs[0].children[0].addEventListener("click", async (e) => {
+			e.preventDefault()
+			window.open(await navigator.clipboard.readText())
+		})
 	</script>
 </html>
