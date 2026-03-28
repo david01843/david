@@ -61,7 +61,8 @@
 		console.log(divs[0].children)
 		divs[0].children[0].addEventListener("click", async (e) => {
 			e.preventDefault()
-			window.open(await navigator.clipboard.readText())
+			const url = await navigator.clipboard.readText()
+			window.open(url)
 		})
 	</script>
 </html>
