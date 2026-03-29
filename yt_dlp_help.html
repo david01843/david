@@ -23,7 +23,7 @@
 		b[0].addEventListener("click", () => {
 			let y = "urls=("
 			for (p of document.querySelectorAll("p")) {y += ` "${p.innerHTML}"`}
-			y += '); for i in "${urls[@]}"; do yt-dlp -f "worst" "$i" || true; done && mv *.mp4 /sdcard/Download/'
+			y += '); for i in "${urls[@]}"; do yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst" "$i" || true; done && mv *.mp4 /sdcard/Download/'
 			navigator.clipboard.writeText(y)
 		})
 		b[1].addEventListener("click", () => {
