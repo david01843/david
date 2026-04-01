@@ -2,26 +2,26 @@
 	<head>
 		<meta charset="UTF-8" name="google" content="notranslate">
 		<style>
-			* {margin: 0}
+			p {margin: 0;}
 		</style>
 	</head>
 	<body></body>
-	<script src="vocab_data.js"></script>
+	<script src="a1a2db.js"></script>
 	<script>
 		b = document.querySelector("body")
-		var p
-		data.forEach(i => {
+		function pp(txt) {
 			p = document.createElement("p")
-			p.style.margin = "16px"
-			p.innerHTML = i[0]
+			p.innerHTML = txt
 			b.appendChild(p)
-			for (j = 1; j < i.length; j += 2) {
-				p = document.createElement("p")
-				p.style.marginLeft = 32
-				p.innerHTML = `${i[j]} ---- ${i[j+1]}`
-				b.appendChild(p)
+		}
+		for (let i in all_data) {
+			pp("-")
+			pp("----"+i+"----------------------------------------------------------------")
+			for (let j in all_data[i]) {
+				let y = all_data[i][parseInt(j)]
+				pp(`${y["t"]} -- ${y["0"]+(y["1sn"] || y["1ma"] || y["inf"] || "")}`)
 			}
-		})
+		}
 	</script>
 </html>
 
