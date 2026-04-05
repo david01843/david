@@ -2226,6 +2226,28 @@ const all_data = {
 		{"t": `symbol, emblem`, "0": "символ"},
 		{"t": `specific, particular`, "0": "определённой"}
 	],
+	"engr7": [
+		{"t": `"structure of atom"`, "0": "строение атома"},
+		{"t": `"structure of atom"`, "0": "структура атома"},
+		{"t": `particle`, "0": "частица"},
+		{"t": `"elementary particle"`, "0": "элементарная частица"},
+		{"t": `"rotate around"`, "0": "вращаться вокруг"},
+		{"t": `core`, "0": "ядро"},
+		{"t": `proton`, "0": "протон"},
+		{"t": `neutron`, "0": "нейтрон"},
+		{"t": `electron`, "0": "электрон"},
+		{"t": `charge`, "0": "заряд"},
+		{"t": `"positive charge"`, "0": "полжителный заряд"},
+		{"t": `“negative charge”`, "0": "отрицательный заряд"},
+		{"t": `electronically neutral`, "0": "элекктронейтрален"},
+		{"t": `neutrino`, "0": "нейтрино"},
+		{"t": `opposite`, "0": "протилороложный"},
+		{"t": `ion`, "0": "ион"},
+		{"t": `cation`, "0": "катион"},
+		{"t": `anion`, "0": "анион"},
+		{"t": `ionization`, "0": "ионизация"},
+		{"t": `ionized`, "0": "ионизированный"}
+	],
 	"phys1": [
 		{"t": `substance, matter (n)`, "0": "вещество"},
 		{"t": `field (n)`, "0": "поле"},
