@@ -2246,7 +2246,9 @@ const all_data = {
 		{"t": `cation`, "0": "катион"},
 		{"t": `anion`, "0": "анион"},
 		{"t": `ionization`, "0": "ионизация"},
-		{"t": `ionized`, "0": "ионизированный"}
+		{"t": `ionized`, "0": "ионизированный"},
+		{"t": `keep, maintain, preserve`, "0": "сохранять"},
+		{"t": `to consist of, be composed of`, "0": "состоять"}
 	],
 	"phys1": [
 		{"t": `substance, matter (n)`, "0": "вещество"},
