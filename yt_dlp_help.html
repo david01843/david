@@ -7,6 +7,7 @@
 		button {padding: 16px 32px; font-size: 20px;}
 	</style>
 	<body>
+		<button style="font-weight: bold;">force EN</button>
 		<button style="font-weight: bold;">! FORM COMMAND !</button>
 		<button>remove last</button>
 		<button style="color: blue;">+ add url +</button>
@@ -20,17 +21,25 @@
 	<script>
 		body = document.querySelector("body")
 		b = document.querySelectorAll("button")
+		
 		b[0].addEventListener("click", () => {
+			let y = "urls=("
+			for (p of document.querySelectorAll("p")) {y += ` "${p.innerHTML}"`}
+			y += '); for i in "${urls[@]}"; do yt-dlp --cookies /sdcard/Download/cookies.txt --match-filter "language ~= ^en" "-f "worst" "$i" || true; done && mv *.mp4 /sdcard/Download/'
+			navigator.clipboard.writeText(y)
+		})
+		
+		b[1].addEventListener("click", () => {
 			let y = "urls=("
 			for (p of document.querySelectorAll("p")) {y += ` "${p.innerHTML}"`}
 			y += '); for i in "${urls[@]}"; do yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst" "$i" || true; done && mv *.mp4 /sdcard/Download/'
 			navigator.clipboard.writeText(y)
 		})
-		b[1].addEventListener("click", () => {
+		b[2].addEventListener("click", () => {
 			ps = document.querySelectorAll("p")
 			ps[ps.length-1].remove()
 		})
-		b[2].addEventListener("click", () => {
+		b[3].addEventListener("click", () => {
 			let p = document.createElement("p")
 			navigator.clipboard.readText().then(x => {p.innerHTML = x})
 			body.appendChild(p)
