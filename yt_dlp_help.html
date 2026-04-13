@@ -22,10 +22,10 @@
 		body = document.querySelector("body")
 		b = document.querySelectorAll("button")
 		
-		b[0].addEventListener("click", () => {
+		b[0].addEventListener("click", async () => {
 			let y = ""
-			navigator.clipboard.readText().then(x => {y = x})
-			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt --match-filter "language ~= ^en" -f "worst" "${y}" && mv *.mp4 /sdcard/Download/`
+			await navigator.clipboard.readText().then(x => {y = x})
+			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst[language=en]/worst" "${y}" && mv *.webm *.m4a *.mp4 /sdcard/Download/`
 			navigator.clipboard.writeText(z)
 		})
 		

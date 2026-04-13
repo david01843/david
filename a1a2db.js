@@ -2248,7 +2248,15 @@ const all_data = {
 		{"t": `ionization`, "0": "ионизация"},
 		{"t": `ionized`, "0": "ионизированный"},
 		{"t": `keep, maintain, preserve`, "0": "сохранять"},
-		{"t": `to consist of, be composed of`, "0": "состоять"}
+		{"t": `to consist of, be composed of`, "0": "состоять"},
+		{"t": `"simple substance"`, "0": "простое вещество"},
+		{"t": `“compound substance”`, "0": "сложное вещество"},
+		{"t": `to show, indicate (iv)`, "0": "показывать"},
+		{"t": `"qualitative composition" (which elements)`, "0": "качественный состав"},
+		{"t": `"quantitative composition" (element count)`, "0": "количественный состав"},
+		{"t": `subscript (in formula)`, "0": "индекс"},
+		{"t": `coefficient`, "0": "коэффициент"},
+		{"t": `"divide into, split into"`, "0": "делиться на"}
 	],
 	"phys1": [
 		{"t": `substance, matter (n)`, "0": "вещество"},
