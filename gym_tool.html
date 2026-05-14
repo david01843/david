@@ -30,7 +30,7 @@
 	<body>
 		<div></div>
 		<h1>00:00</h1>
-		<h2>-10</h2><h2>+10</h2><h2>-2</h2><h2>+2</h2>
+		<h2>-30</h2><h2>+30</h2><h2>-10</h2><h2>+10</h2>
 		<h3>0</h3>
 		<div></div>
 	</body>
@@ -65,10 +65,10 @@
 			h3.style.left = `${p.x-h3.getBoundingClientRect().width/2}px`
 		}
 		divs[1].addEventListener("click", () => {counter = 0; setcounter()})
-		h2s[0].addEventListener("click", () => {counter -= 10; setcounter()})
-		h2s[1].addEventListener("click", () => {counter += 10; setcounter()})
-		h2s[2].addEventListener("click", () => {counter -= 2; setcounter()})
-		h2s[3].addEventListener("click", () => {counter += 2; setcounter()})
+		h2s[0].addEventListener("click", () => {counter -= 30; setcounter()})
+		h2s[1].addEventListener("click", () => {counter += 30; setcounter()})
+		h2s[2].addEventListener("click", () => {counter -= 10; setcounter()})
+		h2s[3].addEventListener("click", () => {counter += 10; setcounter()})
 	</script>
 </html>
 
