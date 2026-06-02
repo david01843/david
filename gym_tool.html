@@ -2,73 +2,49 @@
 	<head>
 		<meta charset="UTF-8" name="google" content="notranslate">
 		<style>
-			* {margin: 0; font-family: monospace; color: white;}
-			body {
-				display: grid; background-color: black;
-				grid-template-rows: auto auto 1fr 1fr auto;
-				grid-template-columns: 1fr 1fr;
-			}
-			div {
-				background-color: red; width: 96px; height: 96px;
-				border-radius: 32px; margin: 16px auto;
-			}
-			div:nth-of-type(1) {grid-row: 1; grid-column: 1 / 3;}
-			div:nth-of-type(2) {grid-row: 5; grid-column: 1 / 3;}
-			h1 {
-				grid-row: 2; grid-column: 1 / 3;
-				font-size: 256px; text-align: center;
-				border-bottom: 1px solid white;
-			}
-			h2 {display: flex; justify-content: center; align-items: center;}
-			h2:nth-of-type(1) {grid-row: 3; grid-column: 1;}
-			h2:nth-of-type(2) {grid-row: 3; grid-column: 2;}
-			h2:nth-of-type(3) {grid-row: 4; grid-column: 1; border-bottom: 1px solid white;}
-			h2:nth-of-type(4) {grid-row: 4; grid-column: 2; border-bottom: 1px solid white;}
-			h3 {position: absolute; font-size: 256px;}
+			* {margin: 8px; font-family: monospace;}
+			body {background-color: black;}
+			h1, h2 {position: absolute; text-align: center; left: 0; right: 0;}
+			h1 {font-size: 256px; color: yellow; top: 0;}
+			h2 {font-size: 256px; color: gray; bottom: 0;}
 		</style>
 	</head>
 	<body>
-		<div></div>
-		<h1>00:00</h1>
-		<h2>-30</h2><h2>+30</h2><h2>-10</h2><h2>+10</h2>
-		<h3>0</h3>
-		<div></div>
+		<h1>0:00</h1>
+		<h2>00:00</h2>
 	</body>
 	<script>
-		const divs = document.querySelectorAll("div")
+		const body = document.querySelector("body")
 		const h1 = document.querySelector("h1")
-		const h2s = document.querySelectorAll("h2")
-		const h3 = document.querySelector("h3")
+		const h2 = document.querySelector("h2")
 		
-		const p = h2s[3].getBoundingClientRect()
-		const _ = h3.getBoundingClientRect()
-		h3.style.left = `${p.x-_.width/2}px`
-		h3.style.top = `${p.y-_.height/2}px`
-		
-		var time = Date.now()
-		divs[0].addEventListener("click", () => {
-			time = Date.now()
-			h1.innerHTML = `00:00`
-		})
-		function tick() {
-			const t = Math.floor((Date.now()-time)/1000)
-			const m = Math.floor(t/60).toString().padStart(2, '0')
-			const s = (t%60).toString().padStart(2, '0')
+		var seconds = 0
+		var newtimer = false
+		function settimer() {
+			seconds += 1
+			const m = (~~(seconds / 60)%10).toString()
+			const s = (seconds%60).toString().padStart(2, "0")
 			h1.innerHTML = `${m}:${s}`
-			setTimeout(tick, 1000)
+			setTimeout(() => {if (!newtimer) settimer()}, 1000)
 		}
-		tick()
+		body.addEventListener("click", () => {
+			seconds = 0
+			newtimer = true
+			h1.style.color = "black"
+			h1.innerHTML = "0:00"
+			setTimeout(() => {h1.style.color = "yellow"}, 100)
+			setTimeout(() => {newtimer = false; settimer()}, 1000)
+		})
 		
-		var counter = 0
-		function setcounter() {
-			h3.innerHTML = `${counter}`
-			h3.style.left = `${p.x-h3.getBoundingClientRect().width/2}px`
+		function setclock() {
+			const t = new Date()
+			const h = t.getHours().toString().padStart(2, "0")
+			const m = t.getMinutes().toString().padStart(2, "0")
+			const s = t.getSeconds().toString().padStart(2, "0")
+			h2.innerHTML = `${h}:${m}:${s}`
+			setTimeout(setclock, 1000)
 		}
-		divs[1].addEventListener("click", () => {counter = 0; setcounter()})
-		h2s[0].addEventListener("click", () => {counter -= 30; setcounter()})
-		h2s[1].addEventListener("click", () => {counter += 30; setcounter()})
-		h2s[2].addEventListener("click", () => {counter -= 10; setcounter()})
-		h2s[3].addEventListener("click", () => {counter += 10; setcounter()})
+		setclock()
 	</script>
 </html>
 
