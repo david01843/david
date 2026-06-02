@@ -11,6 +11,7 @@
 		<button style="font-weight: bold;">! FORM COMMAND !</button>
 		<button>remove last</button>
 		<button style="color: blue;">+ add url +</button>
+		<button>ru audio and ru subtitles</button>
 		<!--pkg update && pkg upgrade
 		pkg install yt-dlp (takes a long time)
 		pkg upgrade yt-dlp
@@ -43,6 +44,13 @@
 			let p = document.createElement("p")
 			navigator.clipboard.readText().then(x => {p.innerHTML = x})
 			body.appendChild(p)
+		})
+		
+		b[4].addEventListener("click", async () => {
+			let y = ""
+			await navigator.clipboard.readText().then(x => {y = x})
+			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt --write-subs --sub-lang ru --embed-subs -f "worst" "${y}" && mv *.webm *.m4a *.mp4 /sdcard/Download/`
+			navigator.clipboard.writeText(z)
 		})
 	</script>
 </html>
