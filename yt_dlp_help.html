@@ -49,7 +49,7 @@
 		b[4].addEventListener("click", async () => {
 			let y = ""
 			await navigator.clipboard.readText().then(x => {y = x})
-			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt --write-subs --sub-lang ru --embed-subs -f "worst" "${y}" && mv *.webm *.m4a *.mp4 /sdcard/Download/`
+			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt --write-auto-subs --sub-lang ru --embed-subs -f "worst" "${y}" && mv *.webm *.m4a *.mp4 /sdcard/Download/`
 			navigator.clipboard.writeText(z)
 		})
 	</script>
