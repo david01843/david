@@ -14,11 +14,13 @@
 	</head>
 	<body>
 		<h1>00:00:00</h1><h2>0</h2>
+		<audio src="tick.mp3" preload="auto"></audio>
 	</body>
 	<script>
 		const body = document.querySelector("body")
 		const h1 = document.querySelector("h1")
 		const h2 = document.querySelector("h2")
+		const audio = document.querySelector("audio")
 		
 		function setclock() {
 			const t = new Date()
@@ -45,7 +47,11 @@
 		var counttimeout = null
 		
 		function countdown() {
-			h2.innerHTML = h2.innerHTML == "0" ? timer : Number(h2.innerHTML)-1
+			if (h2.innerHTML == "0") {
+				h2.innerHTML = timer
+				audio.play()
+			} else {
+				h2.innerHTML = Number(h2.innerHTML)-1
 			counttimeout = setTimeout(countdown, 1000)
 		}
 		window.addEventListener("touchstart", (e) => {
