@@ -14,13 +14,14 @@
 	h2 {grid-row: 4; color: silver; font-size: 20px; min-height: 24px;}
 	h1 {grid-row: 5; margin-top: 16px; font-size: 28px; min-height: 32px; color: gainsboro;}
 	#cards {display: grid; grid-auto-flow: column; gap: 2px; grid-row: 2; width: fit-content;}
-	#cards p {width: 16px; height: 16px; background-color: #2E3D24;}
+	#cards p {width: 24px; height: 15px; background-color: #2E3D24;}
 	#cards .on {background-color: #6F8C5A;} /*hi/lo orange #CC6A1A #5C2E0E hi/lo green #6F8C5A #2E3D24*/
+	.save {position: absolute; right: 0; color: silver; font-size: 14px;}
 </style>
 <body>
 	<div id="lists"></div>
-	<div id="modes"><p>english text prompt</p><p>russian text prompt</p><p>russian speech prompt</p></div>
-	<h2></h2><h1></h1><div id="cards"></div>
+	<div id="modes"><p>en text</p><p>ru text</p><p>ru audio</p></div>
+	<div id="cards"></div><h2></h2><h1></h1>
 </body>
 <script src="db.js"></script>
 <script>
@@ -40,7 +41,8 @@
 		let lp = document.createElement("p")
 		lp.innerHTML = d
 		lp.addEventListener("click", () => {
-			let ws = data[d].sort(() => Math.random()-.5)
+			lp.style.color = "blue"
+			let ws = data[d]
 			let l = ws.length+document.querySelectorAll("#cards p").length
 			cards.style.gridTemplateRows =  `repeat(${~~(Math.sqrt(l))}, auto)`
 			ws.forEach((w) => {
@@ -55,6 +57,8 @@
 				})
 				cards.appendChild(cp)
 			})
+			let x = Array.from(cards.querySelectorAll("p"))
+			x.sort(() => Math.random()-.5).forEach(p => cards.appendChild(p))
 			cycle()
 		})
 		lists.appendChild(lp)
@@ -62,12 +66,12 @@
 	
 	function check() {
 		if (h1.innerHTML == h1.dataset.metadata) {
-			h1.style.color = "limegreen"
+			h1.style.color = "#4CAF50" // green
 			if (mode == 0) {speechSynthesis.speak(audio)}
 			else if (mode == 1) {speechSynthesis.speak(audio)}
 			else if (mode == 2) {h2.innerHTML = h2.dataset.metadata}
 		} else if (h1.innerHTML != h1.dataset.metadata.slice(0, h1.innerHTML.length)) {
-			h1.style.color = "red"
+			h1.style.color = "#B03828" // red
 		} else {
 			h1.style.color = "gainsboro"
 		}
@@ -98,17 +102,23 @@
 	const codes = [192, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 189, 187, 81, 87, 69, 82, 84, 89, 85, 73, 79, 80, 219, 221, 220, 65, 83, 68, 70, 71, 72, 74, 75, 76, 186, 222, 90, 88, 67, 86, 66, 78, 77, 188, 190, 191]
 	document.addEventListener("keydown", (e) => {
 		if (codes.includes(e.keyCode)) {h1.innerHTML += chars[codes.indexOf(e.keyCode)]; check()}
-		else if (e.keyCode == 8) {h1.innerHTML = h1.innerHTML.slice(0, -1); check()}
-		else if (e.keyCode == 13) {
-			if (h1.style.color == "limegreen") {
+		else if (e.key == "Backspace") {h1.innerHTML = h1.innerHTML.slice(0, -1); check()}
+		else if (e.key == "Enter") {
+			if (h1.style.color == "rgb(76, 175, 80)") { // green
 				if (e.shiftKey) active.classList.remove("on")
 				cycle()
 			}
 			else {h1.innerHTML = h1.dataset.metadata; check()}
 		}
-		else if (e.keyCode == 32) {answer.innerHTML += " "; check()}
-		else if (e.key == "Delete") {cards.innerHTML = ""}
-		else if (e.key == "LeftArrow") {speechSynthesis.speak(audio)}
+		else if (e.keyCode == 32) {answer.innerHTML += " "; check()} // Space
+		else if (e.key == "Delete") {
+			cards.innerHTML = ""
+			lists.querySelectorAll("p").forEach(p => p.style.color = "gray")
+		}
+		else if (e.key == "ArrowLeft") {
+			speechSynthesis.cancel()
+			speechSynthesis.speak(audio)
+		}
 	})
 </script>
 </html>
