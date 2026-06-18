@@ -1,0 +1,83 @@
+<html lang="en"><!--https://htmlcolorcodes.com/color-names/-->
+	<head>
+		<meta charset="UTF-8" name="google" content="notranslate">
+		<style>
+			* {margin: 0; font-family: "Ubuntu Mono", monospace; user-select: none;}
+			body {
+				display: grid; grid-template-rows: 1fr auto 1fr auto 1fr; place-items: center;
+				width: 100%; height: 100%; background-color: black;
+			}
+			h1 {grid-row: 2; font-size: 240px; color: gray;}
+			h2 {grid-row: 4; font-size: 720px; color: silver;}
+		</style>
+	</head>
+	<body>
+		<h1>00:00:00</h1><h2>0</h2>
+		<audio src="tick.mp3" preload="auto"></audio>
+	</body>
+	<script>
+		const body = document.querySelector("body")
+		const h1 = document.querySelector("h1")
+		const h2 = document.querySelector("h2")
+		const audio = document.querySelector("audio")
+		
+		function setclock() {
+			const t = new Date()
+			const h = (t.getHours()%12).toString().padStart(2, "0")
+			const m = t.getMinutes().toString().padStart(2, "0")
+			const s = t.getSeconds().toString().padStart(2, "0")
+			h1.innerHTML = `${h}:${m}:${s}`
+			setTimeout(setclock, 1000)
+		}
+		setclock()
+		
+		const rect = h2.getBoundingClientRect()
+		const cx = rect.x+rect.width/2
+		const cy = rect.y+rect.height/2
+		var x = 0
+		var y = 0
+		var drag = 0
+		var setting = false
+		var cp = 0 // cross product
+		var dp = 0 // dot product
+		var mp = 0 // magnitude product
+		var t = 0 // theta
+		var timer = 0
+		var counttimeout = null
+		
+		function countdown() {
+			if (h2.innerHTML == "0") {
+				h2.innerHTML = timer
+				audio.play()
+			} else {
+				h2.innerHTML = Number(h2.innerHTML)-1
+			}
+			counttimeout = setTimeout(countdown, 1000)
+		}
+		window.addEventListener("touchstart", (e) => {
+			audio.load()
+			x = e.touches[0].clientX
+			y = e.touches[0].clientY
+			drag = 0
+			setting = true
+			clearTimeout(counttimeout)
+		})
+		window.addEventListener("touchmove", (e) => {
+			if (setting && e.touches[0]) {
+				cp = (x-cx)*(e.touches[0].clientY-cy)-(y-cy)*(e.touches[0].clientX-cx)
+				dp = (x-cx)*(e.touches[0].clientX-cx)+(y-cy)*(e.touches[0].clientY-cy)
+				mp = Math.hypot(x-cx, y-cy)*Math.hypot(e.touches[0].clientX-cx, e.touches[0].clientY-cy)
+				t = Math.sign(cp)*Math.acos(dp/mp)
+				if (!isNaN(t)) drag = Math.min(Math.max(drag+4*t, 0), 99)
+				h2.innerHTML = Math.floor(drag)
+			}
+			x = e.touches[0].clientX
+			y = e.touches[0].clientY
+		})
+		window.addEventListener("touchend", () => {
+			setting = false
+			timer = Math.floor(drag)
+			if (timer != 0) counttimeout = setTimeout(countdown, 1000)
+		})
+	</script>
+</html>
