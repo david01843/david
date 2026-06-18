@@ -1,0 +1,56 @@
+<html lang="en"><!--https://colorscheme.ru/html-colors.html-->
+	<head>
+		<meta charset="UTF-8" name="google" content="notranslate">
+	</head>
+	<style>
+		* {margin: 8px; font-family: monospace;}
+		button {padding: 16px 32px; font-size: 20px;}
+	</style>
+	<body>
+		<button style="font-weight: bold;">podcast</button>
+		<button style="font-weight: bold;">! FORM COMMAND !</button>
+		<button>remove last</button>
+		<button style="color: blue;">+ add url +</button>
+		<button>ru audio and ru subtitles</button>
+		<!--pkg update && pkg upgrade
+		pkg install yt-dlp (takes a long time)
+		pkg upgrade yt-dlp
+		yt-dlp "https://rutube.ru/video/750a5bf3e07eb57e4034b02053250a88/"
+		pwd
+		ls -la-->
+	</body>
+	<script>
+		body = document.querySelector("body")
+		b = document.querySelectorAll("button")
+		
+		b[0].addEventListener("click", async () => {
+			let y = ""
+			await navigator.clipboard.readText().then(x => {y = x})
+			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst[language=en]/worst" "${y}" && mv *.webm *.m4a *.mp4 /sdcard/Download/`
+			navigator.clipboard.writeText(z)
+		})
+		
+		b[1].addEventListener("click", () => {
+			let y = "urls=("
+			for (p of document.querySelectorAll("p")) {y += ` "${p.innerHTML}"`}
+			y += '); for i in "${urls[@]}"; do yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst" "$i" || true; done && mv *.mp4 /sdcard/Download/'
+			navigator.clipboard.writeText(y)
+		})
+		b[2].addEventListener("click", () => {
+			ps = document.querySelectorAll("p")
+			ps[ps.length-1].remove()
+		})
+		b[3].addEventListener("click", () => {
+			let p = document.createElement("p")
+			navigator.clipboard.readText().then(x => {p.innerHTML = x})
+			body.appendChild(p)
+		})
+		
+		b[4].addEventListener("click", async () => {
+			let y = ""
+			await navigator.clipboard.readText().then(x => {y = x})
+			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt --write-auto-subs --sub-lang ru --embed-subs -f "worst" "${y}" && mv *.webm *.m4a *.mp4 /sdcard/Download/`
+			navigator.clipboard.writeText(z)
+		})
+	</script>
+</html>

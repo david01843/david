@@ -1,0 +1,114 @@
+<html lang="en"><!--https://colorscheme.ru/html-colors.html-->
+<head><meta charset="UTF-8" name="google" content="notranslate"></head>
+<style>
+	* {margin: 0; user-select: none; font-family: sans-serif;}
+	#lists, #modes {position: absolute; left: 0;}
+	#lists {top: 0;} #modes {bottom: 0;}
+	#lists p, #modes p {width: fit-content; color: gray; font-size: 12px; cursor: pointer;}
+	#lists p {margin: 4px 0 0 4px;} #modes p {margin: 0 0 4px 4px;}
+	body {
+		display: grid; grid-template-rows: 1fr auto 1fr auto auto 64px;
+		margin-left: 32px; width: calc(100% - 32px); height: 100%; justify-content: center;
+		place-items: center; text-align: center; background-color: black;
+	}
+	h2 {grid-row: 4; color: silver; font-size: 20px; min-height: 24px;}
+	h1 {grid-row: 5; margin-top: 16px; font-size: 28px; min-height: 32px; color: gainsboro;}
+	#cards {display: grid; grid-auto-flow: column; gap: 2px; grid-row: 2; width: fit-content;}
+	#cards p {width: 16px; height: 16px; background-color: #2E3D24;}
+	#cards .on {background-color: #6F8C5A;} /*hi/lo orange #CC6A1A #5C2E0E hi/lo green #6F8C5A #2E3D24*/
+</style>
+<body>
+	<div id="lists"></div>
+	<div id="modes"><p>english text prompt</p><p>russian text prompt</p><p>russian speech prompt</p></div>
+	<h2></h2><h1></h1><div id="cards"></div>
+</body>
+<script src="db.js"></script>
+<script>
+	const modes = document.querySelectorAll("#modes p")
+	const lists = document.querySelector("#lists")
+	const h2 = document.querySelector("h2")
+	const h1 = document.querySelector("h1")
+	const cards = document.querySelector("#cards")
+	
+	var mode = 0; modes[0].style.color = "blue"
+	modes.forEach((m, i) => {m.addEventListener("click", () => {
+		modes[mode].style.color = "gray"; modes[i].style.color = "blue"; mode = i
+	})})
+	
+	var on = true
+	Object.keys(data).forEach((d) => {
+		let lp = document.createElement("p")
+		lp.innerHTML = d
+		lp.addEventListener("click", () => {
+			let ws = data[d].sort(() => Math.random()-.5)
+			let l = ws.length+document.querySelectorAll("#cards p").length
+			cards.style.gridTemplateRows =  `repeat(${~~(Math.sqrt(l))}, auto)`
+			ws.forEach((w) => {
+				let cp = document.createElement("p")
+				cp.classList.add("on")
+				cp.dataset.metadata = w
+				cp.addEventListener("mousedown", () => {
+					cp.classList.toggle("on"); on = cp.classList.contains("on")
+				})
+				cp.addEventListener("mouseenter", (e) => {
+					if (e.buttons > 0) on ? cp.classList.add("on") : cp.classList.remove("on")
+				})
+				cards.appendChild(cp)
+			})
+			cycle()
+		})
+		lists.appendChild(lp)
+	})
+	
+	function check() {
+		if (h1.innerHTML == h1.dataset.metadata) {
+			h1.style.color = "limegreen"
+			if (mode == 0) {speechSynthesis.speak(audio)}
+			else if (mode == 1) {speechSynthesis.speak(audio)}
+			else if (mode == 2) {h2.innerHTML = h2.dataset.metadata}
+		} else if (h1.innerHTML != h1.dataset.metadata.slice(0, h1.innerHTML.length)) {
+			h1.style.color = "red"
+		} else {
+			h1.style.color = "gainsboro"
+		}
+	}
+	var active = ""
+	var audio = new SpeechSynthesisUtterance();	audio.lang = "ru"
+	function cycle() {
+		speechSynthesis.cancel()
+		let x = Array.from(document.querySelectorAll("#cards .on"))
+		if (x.length == 0) {
+			h2.innerHTML = ""; h1.innerHTML = ""; h1.dataset.metadata = ""; active = ""
+		} else if (x.length > 0) {
+			x.sort(() => Math.random()-.5)
+			x = (x.length > 1 && x[0] == active) ? x[1] : x[0]
+			let y = x.dataset.metadata.split("|")
+			if (mode == 0) {h2.innerHTML = y[0]; h1.dataset.metadata = y[1]; audio.text = y[1]}
+			else if (mode == 1) {h2.innerHTML = y[1]; h1.dataset.metadata = y[0]; audio.text = y[1]}
+			else if (mode == 2) {
+				h2.innerHTML = ""; h2.dataset.metadata = y[0]
+				h1.dataset.metadata = y[1]; audio.text = y[1]; speechSynthesis.speak(audio)}
+			active = x
+		}
+		h1.innerHTML = ""
+		h1.style.color = "gainsboro"
+	}
+	
+	const chars = "ё1234567890-=йцукенгшщзхъ\\фывапролджэячсмитьбю,"
+	const codes = [192, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 189, 187, 81, 87, 69, 82, 84, 89, 85, 73, 79, 80, 219, 221, 220, 65, 83, 68, 70, 71, 72, 74, 75, 76, 186, 222, 90, 88, 67, 86, 66, 78, 77, 188, 190, 191]
+	document.addEventListener("keydown", (e) => {
+		if (codes.includes(e.keyCode)) {h1.innerHTML += chars[codes.indexOf(e.keyCode)]; check()}
+		else if (e.keyCode == 8) {h1.innerHTML = h1.innerHTML.slice(0, -1); check()}
+		else if (e.keyCode == 13) {
+			if (h1.style.color == "limegreen") {
+				if (e.shiftKey) active.classList.remove("on")
+				cycle()
+			}
+			else {h1.innerHTML = h1.dataset.metadata; check()}
+		}
+		else if (e.keyCode == 32) {answer.innerHTML += " "; check()}
+		else if (e.key == "Delete") {cards.innerHTML = ""}
+		else if (e.key == "LeftArrow") {speechSynthesis.speak(audio)}
+	})
+</script>
+</html>
