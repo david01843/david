@@ -4,7 +4,7 @@
 	</head>
 	<style>
 		html {background: #111;}
-		a {font-size: 16px; font-family: sans-serif; text-decoration: none; display: block; width: fit-content;}
+		a {font-size: 24px; font-family: sans-serif; text-decoration: none; display: block; width: fit-content;}
 		a:hover {cursor: pointer;}
 	</style>
 	<body><!--example russian language test: https://inostr-exam.fipi.ru/bank/index.php?proj=8FFB3FDC1B9E9DB740E528C8E1058CF0-->
@@ -34,10 +34,7 @@
 	<script>
 		const a = document.querySelectorAll("a")
 		a.forEach(i => {i.target = "_blank"})
-		for (let i = 0; i < 4; i++) {
-			a[i].style.display = "inline-block"
-			a[i].style.fontSize = 60
-			a[i].style.marginRight = 16
-		}
+		for (let i = 0; i < 4; i++) {a[i].style.display = "inline-block"; a[i].style.fontSize = 72}
+		for (let i = 0; i < 3; i++) {a[i].style.marginRight = 16}
 	</script>
 </html>
