@@ -104,12 +104,12 @@
 		console.log(e.key)
 		if (codes.includes(e.keyCode)) {h1.innerHTML += chars[codes.indexOf(e.keyCode)]; check()}
 		else if (e.key == "Backspace") {h1.innerHTML = h1.innerHTML.slice(0, -1); check()}
-		else if (e.key == "Enter" || e.key == "Shift") {
-			if (h1.style.color == "rgb(76, 175, 80)") { // green
-				if (e.key == "Enter") active.classList.remove("on")
-				cycle()
-			}
+		else if (e.key == "Enter") {
+			if (h1.style.color == "rgb(76, 175, 80)") cycle()
 			else {h1.innerHTML = h1.dataset.metadata; check()}
+		}
+		else if (e.key == "Shift" && h1.style.color == "rgb(76, 175, 80)") {
+			active.classList.remove("on"); cycle()
 		}
 		else if (e.keyCode == 32) {answer.innerHTML += " "; check()} // Space
 		else if (e.key == "Delete") {
