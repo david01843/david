@@ -95,11 +95,11 @@
 		})
 		window.addEventListener("mouseup", () => {
 			setting = false; timer = ~~settime; counter = 0
-			if (timer > 1) counttimeout = setTimeout(countdown, 100)
+			timer > 1 ? counttimeout = setTimeout(countdown, 100) : ps[1].innerHTML = "0"
 		})
 		window.addEventListener("touchend", () => {
 			setting = false; timer = ~~settime; counter = 0
-			if (timer > 1) counttimeout = setTimeout(countdown, 100)
+			timer > 1 ? counttimeout = setTimeout(countdown, 100) : ps[1].innerHTML = "0"
 		})
 	</script>
 </html>
