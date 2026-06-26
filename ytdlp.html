@@ -3,54 +3,55 @@
 		<meta charset="UTF-8" name="google" content="notranslate">
 	</head>
 	<style>
-		* {margin: 8px; font-family: monospace;}
-		button {padding: 16px 32px; font-size: 20px;}
+		* {margin: 0.5em;}
+		h3 {margin-bottom: 0;}
+		a {display: block; width: fit-content; margin-top: 0; margin-left: 2em; color: blue;}
+		a:hover {cursor: pointer; color: violet;}
+		button {padding: 1em 2em;}
+		p {width: fit-content; color: gray;}
+		p:hover {cursor: pointer; color: red;}
 	</style>
 	<body>
-		<button style="font-weight: bold;">podcast</button>
-		<button style="font-weight: bold;">! FORM COMMAND !</button>
-		<button>remove last</button>
-		<button style="color: blue;">+ add url +</button>
-		<button>ru audio and ru subtitles</button>
-		<!--pkg update && pkg upgrade
-		pkg install yt-dlp (takes a long time)
-		pkg upgrade yt-dlp
-		yt-dlp "https://rutube.ru/video/750a5bf3e07eb57e4034b02053250a88/"
-		pwd
-		ls -la-->
+		<h3>Desktop</h3>
+		<a>yt-dlp -f "worst" "$i"; done; mv *.webm *.m4a *.mp4 /home/david/Desktop/music/</a>
+		<h3>Mobile</h3>
+		<a>yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst" "$i"; done; mv *.webm *.m4a *.mp4 /sdcard/Download/</a>
+		<h3>Mobile (force English)</h3>
+		<a>yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst[language=en]/worst" "$i"; done; mv *.webm *.m4a *.mp4 /sdcard/Download/</a>
+		<h3>List formats</h3>
+		<a>yt-dlp --list-formats "$i"; done</a>
+		<button>Paste URL</button>
+		<!--
+		Install yt-dlp on Linux Mint:
+			sudo apt update && sudo apt upgrade && sudo apt install yt-dlp
+		Upgrade yt-dlp on Linux Mint:
+			sudo apt update && sudo apt upgrade yt-dlp // if installed with apt
+			sudo pip install --upgrade yt-dlp // if installed with pip
+			sudo yt-dlp -U // if installed as standalone binary
+		Install yt-dlp on Android Termux: 
+			pkg update && pkg upgrade && pkg install yt-dlp
+		Upgrade yt-dlp on Android Termux:
+			pip install --upgrade yt-dlp // if installed with pkg
+			pip3 install --upgrade yt-dlp // if installed with pip3
+		-->
 	</body>
 	<script>
-		body = document.querySelector("body")
-		b = document.querySelectorAll("button")
-		
-		b[0].addEventListener("click", async () => {
-			let y = ""
-			await navigator.clipboard.readText().then(x => {y = x})
-			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst[language=en]/worst" "${y}" && mv *.webm *.m4a *.mp4 /sdcard/Download/`
-			navigator.clipboard.writeText(z)
+		function geturls() {
+			let x = ""
+			for (p of document.querySelectorAll("p")) {x += ` "${p.innerHTML}"`}
+			return 'urls=(|); for i in "${urls[@]}"; do '.replace("|", x)
+		}
+		document.querySelectorAll("a").forEach((a) => {
+			a.addEventListener("click", () => {
+				navigator.clipboard.writeText(geturls()+a.innerHTML)
+			})
 		})
-		
-		b[1].addEventListener("click", () => {
-			let y = "urls=("
-			for (p of document.querySelectorAll("p")) {y += ` "${p.innerHTML}"`}
-			y += '); for i in "${urls[@]}"; do yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst" "$i" || true; done && mv *.mp4 /sdcard/Download/'
-			navigator.clipboard.writeText(y)
-		})
-		b[2].addEventListener("click", () => {
-			ps = document.querySelectorAll("p")
-			ps[ps.length-1].remove()
-		})
-		b[3].addEventListener("click", () => {
-			let p = document.createElement("p")
-			navigator.clipboard.readText().then(x => {p.innerHTML = x})
-			body.appendChild(p)
-		})
-		
-		b[4].addEventListener("click", async () => {
-			let y = ""
-			await navigator.clipboard.readText().then(x => {y = x})
-			let z = `yt-dlp --cookies /sdcard/Download/cookies.txt --write-auto-subs --sub-lang ru --embed-subs -f "worst" "${y}" && mv *.webm *.m4a *.mp4 /sdcard/Download/`
-			navigator.clipboard.writeText(z)
+		document.querySelector("button").addEventListener("click", async () => {
+			let x = await navigator.clipboard.readText()
+			let y = document.createElement("p")
+			y.innerHTML = x
+			y.addEventListener("click", () => {y.remove()})
+			document.body.appendChild(y)
 		})
 	</script>
 </html>
