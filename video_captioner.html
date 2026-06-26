@@ -1,0 +1,202 @@
+<!DOCTYPE html><!--https://htmlcolorcodes.com/color-names/-->
+<html lang="en">
+<head>
+	<meta charset="UTF-8" name="google" content="notranslate">
+</head>
+<style>
+	* {margin: 0; font-family: sans-serif; font-size: 14px; user-select: none;}
+	video {width: 100%; position: relative;}
+	#timeline {position: relative; height: 32px; width: 100%; margin-top: 2px; overflow: hidden;}
+	canvas, #playhead {position: absolute; height: 100%; left: 50%;}
+	#playhead {width: 1px; background-color: black;}
+	#ru, #en {
+		width: calc(100% - 32px); margin: 16px 16px 0 16px; padding: 4px; height: 64px;
+		box-sizing: border-box; resize: none; text-align: center; background-color: whitesmoke;
+		border: 1px solid silver;
+	}
+	button {margin: 16px 0 0 16px;}
+	video, #timeline, #ru, #en, button {display: none;}
+</style>
+<body>
+	<input type="file" accept="video/*">
+	<video controls></video>
+	<div id="timeline">
+		<canvas id="subs"></canvas>
+		<canvas id="waves"></canvas>
+		<div id="playhead"></div>
+	</div>
+	<textarea id="ru"></textarea>
+	<textarea id="en"></textarea>
+	<p id="en"></p>
+	<button style="color: red;">Delete</button>
+	<button style="color: blue;">Translate</button>
+	<button>-5s</button><button>-1s</button><button>p/p</button><button>+1s</button><button>+5s</button>
+	<button style="font-size: 11px;">Open .json</button>
+	<button style="font-size: 11px;">Save .json/.srt</button>
+<script>
+	const input = document.querySelector("input")
+	const video = document.querySelector("video")
+	const timeline = document.querySelector("#timeline")
+	const subs = document.querySelector("#subs")
+	const sctx = subs.getContext("2d")
+	const waves = document.querySelector("#waves")
+	const wctx = waves.getContext("2d")
+	const rutext = document.querySelector("#ru")
+	const entext = document.querySelector("#en")
+	const buttons = document.querySelectorAll("button")
+
+	const volume_sample_interval = .05 // EDIT ONLY THIS TO CONTROL TIMELINE WIDTH
+	input.addEventListener("change", async (e) => {
+		const f = e.target.files[0]
+		const u = URL.createObjectURL(f)
+		video.src = u
+		video.load()
+		const actx = new window.AudioContext // audio context
+		const arb = await f.arrayBuffer() // array buffer
+		const aub = await actx.decodeAudioData(arb) // audio buffer
+		const cd = aub.getChannelData(0) // channel data
+		const it = Math.floor(volume_sample_interval*aub.sampleRate) // interval time
+		let sum = 0 // for avg volume calc
+		let count = 0 // for avg volume calc
+		let vols = []
+		for (let i = 0; i < cd.length; i += it) {
+			if (i/aub.sampleRate > aub.duration) break
+			sum = 0
+			count = 0
+			for (let j = i; j < i+it && j < cd.length; j++) {sum += cd[j]**2; count++}
+			vols.push(sum/count)
+		}
+		const m = Math.max(...vols)
+		vols = vols.map(v => 32*v/m >> 0)
+		subs.width = vols.length
+		subs.height = 32
+		waves.width = vols.length
+		waves.height = 32
+		wctx.fillStyle = "gray"
+		for (let i = 0; i < vols.length; i++) {wctx.fillRect(i, (32-vols[i])/2, 1, vols[i])}
+		await actx.close()
+		video.style.display = "block"
+		timeline.style.display = "block"
+		rutext.style.display = "block"
+		entext.style.display = "block"
+		buttons[0].style.display = "inline"
+		buttons[1].style.display = "inline"
+		buttons[2].style.display = "inline"
+		buttons[3].style.display = "inline"
+		buttons[4].style.display = "inline"
+		buttons[5].style.display = "inline"
+		buttons[6].style.display = "inline"
+		buttons[7].style.display = "block"
+		buttons[8].style.display = "block"
+		input.style.display = "none"
+	})
+	function onframe(now, metadata) {
+		subs.style.transform = `translateX(-${subs.clientWidth*video.currentTime/video.duration}px)`
+		waves.style.transform = `translateX(-${waves.clientWidth*video.currentTime/video.duration}px)`
+		video.requestVideoFrameCallback(onframe)
+		select(search(subs.width*video.currentTime/video.duration))
+	}
+	video.requestVideoFrameCallback(onframe)
+	
+	var data = []
+	var d = -1 // active index
+	var t0 = 0
+	function search(x) {
+		if (x < data[0].a) return -1
+		let l = 0, m = 0, r = data.length
+		while (l+1 < r) {m = (l+r) >> 1; data[m].a < x ? l = m : r = m}
+		return data[l].b < x ? -1 : l
+	}
+	function select(i) {
+		d = i
+		sctx.fillStyle = "white"
+		sctx.globalAlpha = 1
+		sctx.fillRect(0, 0, subs.width, 32)
+		sctx.fillStyle = "gray"
+		sctx.globalAlpha = .5
+		data.forEach((j, k) => {if (d != k) sctx.fillRect(j.a, 0, j.b-j.a, 32)})
+		sctx.fillStyle = "cornflowerblue"
+		if (d != -1) sctx.fillRect(data[d].a, 0, data[d].b-data[d].a, 32)
+		rutext.value = d == -1 ? "" : data[d].ru
+		entext.value = d == -1 ? "" : data[d].en
+	}
+	function update() {
+		data[d].ru = rutext.value
+		data[d].en = entext.value
+	}
+	waves.addEventListener("mousedown", (e) => {t0 = e.offsetX})
+	waves.addEventListener("mouseup", (e) => {
+		if (e.offsetX-t0 > 2) {
+			data.push({a: t0, b: e.offsetX, ru: "", en: ""})
+			data.sort((a, b) => a.a-b.a)
+		}
+		select(search(t0+1))
+	})
+	document.addEventListener("input", () => {update()})
+	document.addEventListener("keydown", (e) => {if (e.key == "Escape") {select(-1)}})
+	
+	buttons[0].addEventListener("click", () => {data.splice(d, 1); select(-1)})
+	buttons[1].addEventListener("click", async () => {
+		let x = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q=${rutext.value}`)
+		x = await x.json()
+		entext.value = x[0][0][0]
+		update()
+	})
+	buttons[2].addEventListener("click", () => {video.currentTime -= 5})
+	buttons[3].addEventListener("click", () => {video.currentTime -= 1})
+	buttons[4].addEventListener("click", () => {video.paused ? video.play() : video.pause()})
+	buttons[5].addEventListener("click", () => {video.currentTime += 1})
+	buttons[6].addEventListener("click", () => {video.currentTime += 5})
+	function frametime(frame) {
+		let t = frame*video.duration/subs.width
+		let h = String(~~(t/3600)).padStart(2, "0")
+		let m = String(~~(t%3600/60)).padStart(2, "0")
+		let s = String(~~(t%60)).padStart(2, "0")
+		let ms = String(~~(1000*t)%1000).padStart(3, "0")
+		return `${h}:${m}:${s},${ms}`
+	}
+	buttons[7].addEventListener("click", () => {
+		let input = document.createElement("input")
+		input.type = "file"
+		input.onchange = (e) => {
+			let reader = new FileReader()
+			reader.onload = () => {
+				data = JSON.parse(reader.result)
+				select(-1)
+			}
+			reader.readAsText(e.target.files[0])
+			input.remove()
+		}
+		input.click()
+	})
+	buttons[8].addEventListener("click", () => {
+		{
+			let json = JSON.stringify(data)
+			let blob = new Blob([json], {type: "application/json"})
+			let a = document.createElement("a")
+			a.href = URL.createObjectURL(blob)
+			a.download = prompt("Save as", "subtitles.json")
+			a.click()
+			URL.revokeObjectURL(a.href)
+			a.remove()
+		}
+		{
+			let srt = ""
+			data.forEach((sub, i) => {
+				srt += `${i+1}\n`
+				srt += `${frametime(sub.a)} --> ${frametime(sub.b)}\n`
+				srt += `${sub.ru}\n`
+				srt += `${sub.en}\n\n`
+			})
+			let blob = new Blob([srt], {type: "text/plain"})
+			let a = document.createElement("a")
+			a.href = URL.createObjectURL(blob)
+			a.download = prompt("Save as", "subtitles.srt")
+			a.click()
+			URL.revokeObjectURL(a.href)
+			a.remove()
+		}
+	})
+</script>
+</body>
+</html>
