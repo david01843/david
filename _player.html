@@ -1,0 +1,180 @@
+<!DOCTYPE html><!--https://codeshack.io/arrow-symbols/-->
+<html lang="en"><!--https://codeshack.io/check-mark-symbols/-->
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		* {margin: 0; font-family: monospace; user-select: none; font-size: 11px;}
+		body {
+			display: grid; margin: 8px; grid-gap: 8px; overflow: hidden;
+			grid-template-columns: 500px 1fr; background-color: #111; height: calc(100vh - 16px);
+		}
+		input {position: absolute; background-color: #eee;}
+		div {overflow-y: scroll; height: 100%; -ms-overflow-style: none; display: none;} /* Edge */
+		div::-webkit-scrollbar {display: none;} /* Chrome */
+		a {
+			display: inline-block; vertical-align: top; text-align: center;
+			margin-right: 4px; width: 28px; height: 28px; border-radius: 50%;
+		}
+		a:nth-child(1) {border: 2px solid red; color: red; font-size: 22px; line-height: 26px;}
+		a:nth-child(2) {border: 2px solid lime; color: lime; font-size: 24px; line-height: 28px;}
+		a:nth-child(3) {border: 2px solid blue; color: blue; font-size: 24px; line-height: 24px;}
+		audio {width: 392px; height: 32px; margin-bottom: 8px;}
+		div:nth-child(2) p {color: white; width: fit-content;}
+		div:nth-child(3) p {margin-right: 8px;}
+		div:nth-child(3) p.artist {color: red;}
+		div:nth-child(3) p.album {color: lime;}
+		div:nth-child(3) p.track {color: blue;}
+	</style>
+</head>
+<body>
+	<input type="file" accept="audio/*" multiple webkitdirectory directory>
+	<div><a>✕</a><a>＋</a><a>↺</a><audio controls></audio></div><div></div>
+</body>
+<script>
+	const body = document.querySelector("body")
+	const input = document.querySelector("input")
+	const divs = document.querySelectorAll("div")
+	const controls = document.querySelectorAll("div a")
+	const audio = document.querySelector("audio")
+	
+	var tracks = [] // data objects from files
+	var library = [] // p tags in div[1]
+	var last_artist_viewed = document.createElement("p")
+	last_artist_viewed.dataset.metadata = ""
+	var add_tracks = []
+	var hover_playlist = false
+	var hold_shift_key = false
+	var repeat_track = false
+	var playing = false
+	var searchdelay = Date.now()
+	var searchletter = ""
+	
+	input.addEventListener("change", (e) => {
+		for (let f of Array.from(e.target.files)) {
+			if (f.webkitRelativePath.startsWith("Desktop/music") && f.type.startsWith("audio/")) {
+				let path = f.webkitRelativePath.split("/")
+				let artist = path[3].toLowerCase().replace(/ /g, "-")
+				let album = path.length > 5 ? path[4].toLowerCase().replace(/ /g, "-") : ""
+				let track = path.at(-1).toLowerCase().replace(/ /g, "-").replace(".mp3", "")
+				let file = f // URL.createObjectURL(f)
+				tracks.push({artist: artist, album: album, track: track, file: file})}}
+		tracks.sort((a, b) => a.artist.localeCompare(b.artist) || a.album.localeCompare(b.album) || a.track.localeCompare(b.track))
+		let last_artist = document.createElement("p")
+		let last_album = document.createElement("p")
+		for (let i = 0; i < tracks.length; i++) {
+			if (tracks[i].artist != last_artist.innerHTML) { // new artist
+				let p = document.createElement("p")
+				p.innerHTML = tracks[i].artist
+				p.classList.add("artist")
+				p.dataset.metadata = ""
+				p.style.display = "inline"
+				p.addEventListener("click", (e) => {view_artist(e.target)})
+				p.addEventListener("mousedown", (e) => {add_what(e.target)})
+				library.push(p)
+				last_artist = p}
+			if (tracks[i].album && tracks[i].album != last_album.innerHTML) { // new album
+				let p = document.createElement("p")
+				p.innerHTML = tracks[i].album
+				p.classList.add("album")
+				p.dataset.metadata = ""
+				p.style.display = "none"
+				p.addEventListener("mousedown", (e) => {add_what(e.target)})
+				library.push(p)
+				last_artist.dataset.metadata += `,${library.length-1}`
+				last_album = p}
+			let p = document.createElement("p")
+			p.innerHTML = tracks[i].track
+			p.classList.add("track")
+			p.dataset.metadata = i
+			p.style.display = "none"
+			let l = library.length
+			p.addEventListener("mousedown", () => {add_tracks = [l]})
+			library.push(p)
+			last_artist.dataset.metadata += `,${library.length-1}`
+			last_album.dataset.metadata += tracks[i].album ? `,${library.length-1}` : ""}
+		divs[1].append(...library)
+		divs[0].style.display = "block"
+		divs[1].style.display = "block"
+		input.style.display = "none"})
+		
+	controls[0].addEventListener("click", () => {
+		for (let i of document.querySelectorAll("div:nth-child(2) p")) {
+			if (i.style.backgroundColor == "rgb(68, 0, 0)") {i.remove()}}})
+	controls[0].addEventListener("dblclick", () => {
+		divs[0].querySelectorAll("p").forEach(i => i.remove())
+	})
+	
+	controls[1].addEventListener("click", () => {
+		let x = Array.from({length: tracks.length}, (_, i) => i).sort(() => Math.random()-.5)
+		for (let i of x.slice(-10)) {divs[0].appendChild(add_to_playlist(i))}})
+	controls[2].addEventListener("click", () => {repeat_track = !repeat_track})
+	divs[0].addEventListener("mouseover", () => {hover_playlist = true})
+	divs[0].addEventListener("mouseout", () => {hover_playlist = false})
+	audio.addEventListener("ended", () => {
+		playing.style.color = "white"
+		let q = document.querySelectorAll("div:nth-child(2) p")
+		let i = Array.from(q).indexOf(playing)
+		if (!repeat_track) {i = (i+1)%q.length}
+		play(q[i])})
+		
+	function view_artist(a) {
+		for (let i of last_artist_viewed.dataset.metadata.split(',').filter(Boolean).map(Number)) {
+			library[i].style.display = "none"}
+		last_artist_viewed = a
+		for (let i of a.dataset.metadata.split(',').filter(Boolean).map(Number)) {
+			library[i].style.display = "inline"}}
+	function add_what(p) {
+		add_tracks = []
+		for (i of p.dataset.metadata.split(',').filter(Boolean).map(Number)) {
+			if (library[i].classList.contains("track")) {
+				add_tracks.push(i)}}}
+	function add_to_playlist(t) {
+		let p = document.createElement("p")
+		p.innerHTML = `${tracks[t].artist} ${tracks[t].track}`
+		p.dataset.metadata = t
+		p.addEventListener("mouseenter", (e) => {
+			if (hold_shift_key) {e.target.style.backgroundColor = "#400"}})
+		p.addEventListener("mousemove", (e) => {
+			if (hold_shift_key) {e.target.style.backgroundColor = "#400"}})
+		p.addEventListener("click", (e) => {play(e.target)})
+		return p}
+	function play(t) {
+		if (playing) playing.style.color = "white"
+		audio.src = URL.createObjectURL(tracks[t.dataset.metadata].file)
+		audio.currentTime = 0
+		audio.play()
+		playing = t
+		playing.style.color = "#0f0"}
+
+	window.addEventListener("mouseup", (e) => {
+		if (hover_playlist) {
+			let q = document.querySelectorAll("div:nth-child(2) p")
+			if (q.length == 0 || e.clientY > q[q.length-1].getBoundingClientRect().bottom) {
+				for (let i of add_tracks) {
+					divs[0].appendChild(add_to_playlist(library[i].dataset.metadata))}}
+			else {
+				for (let i of add_tracks) {
+					let j = Math.max(0, Math.floor((e.clientY-51)/13))
+					divs[0].insertBefore(add_to_playlist(library[i].dataset.metadata), q[j])}}}
+		add_tracks = []
+	})
+	window.addEventListener("keydown", (e) => {
+		if (e.key == "Shift") {hold_shift_key = true}
+		else if (e.key == "Escape") {
+			let q = document.querySelectorAll("div:nth-child(2) p")
+			for (let i of q) {i.style.backgroundColor = "#111"}
+		}
+		else {
+			let z = divs[1].querySelectorAll(".artist")
+			z.forEach((y) => {y.style.color = "darkred"})
+			if (Date.now()-searchdelay > 600) searchletter = ""
+			searchletter += e.key
+			let l = searchletter.length
+			z.forEach((y) => {if (y.innerHTML.slice(0, l) == searchletter) {y.style.color = "red"}})
+			searchdelay = Date.now()
+		}
+	})
+	window.addEventListener("keyup", (e) => {if (e.key == "Shift") {hold_shift_key = false}})
+</script>
+</html>
