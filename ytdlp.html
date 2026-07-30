@@ -22,6 +22,8 @@
 		<a>yt-dlp --cookies /sdcard/Download/cookies.txt -f "worst[language=en]/worst" "$i"; done; mv *.webm *.m4a *.mp4 /sdcard/Download/</a>
 		<h3>List formats</h3>
 		<a>yt-dlp --list-formats "$i"; done</a>
+		<h3>Desktop Video</h3>
+		<a>yt-dlp --merge-output-format mp4 "$i"; done; mv *.mp4 /home/david/Documents/</a>
 		<button>Paste URL</button>
 		<!--
 		Install yt-dlp on Linux Mint:
