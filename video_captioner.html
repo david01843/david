@@ -28,11 +28,10 @@
 	<textarea id="ru"></textarea>
 	<textarea id="en"></textarea>
 	<p id="en"></p>
-	<button style="color: red;">Delete</button>
-	<button style="color: blue;">Translate</button>
-	<button>-5s</button><button>-1s</button><button>p/p</button><button>+1s</button><button>+5s</button>
 	<button style="font-size: 11px;">Open .json</button>
 	<button style="font-size: 11px;">Save .json/.srt</button>
+	<button style="color: red;">Delete</button>
+	<button style="color: blue;">Translate</button>
 <script>
 	const input = document.querySelector("input")
 	const video = document.querySelector("video")
@@ -135,18 +134,21 @@
 	document.addEventListener("input", () => {update()})
 	document.addEventListener("keydown", (e) => {if (e.key == "Escape") {select(-1)}})
 	
-	buttons[0].addEventListener("click", () => {data.splice(d, 1); select(-1)})
-	buttons[1].addEventListener("click", async () => {
+	buttons[2].addEventListener("click", () => {data.splice(d, 1); select(-1)})
+	buttons[3].addEventListener("click", async () => {
 		let x = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q=${rutext.value}`)
 		x = await x.json()
 		entext.value = x[0][0][0]
 		update()
 	})
-	buttons[2].addEventListener("click", () => {video.currentTime -= 5})
-	buttons[3].addEventListener("click", () => {video.currentTime -= 1})
-	buttons[4].addEventListener("click", () => {video.paused ? video.play() : video.pause()})
-	buttons[5].addEventListener("click", () => {video.currentTime += 1})
-	buttons[6].addEventListener("click", () => {video.currentTime += 5})
+	var seeking = false
+	var seek_base = 0
+	document.addEventListener('mousedown', (e) => {seeking = true; seek_base = e.clientX})
+	document.addEventListener('mousemove', (e) => {
+		if (seeking && Math.abs(e.clientX-seek_base) > 8) video.currentTime += e.movementX/8
+	})
+	document.addEventListener('mouseup', () => {seeking = false})
+	document.addEventListener("dblclick", () => {video.paused ? video.play() : video.pause()})
 	function frametime(frame) {
 		let t = frame*video.duration/subs.width
 		let h = String(~~(t/3600)).padStart(2, "0")
@@ -155,7 +157,7 @@
 		let ms = String(~~(1000*t)%1000).padStart(3, "0")
 		return `${h}:${m}:${s},${ms}`
 	}
-	buttons[7].addEventListener("click", () => {
+	buttons[0].addEventListener("click", () => {
 		let input = document.createElement("input")
 		input.type = "file"
 		input.onchange = (e) => {
@@ -169,7 +171,7 @@
 		}
 		input.click()
 	})
-	buttons[8].addEventListener("click", () => {
+	buttons[1].addEventListener("click", () => {
 		{
 			let json = JSON.stringify(data)
 			let blob = new Blob([json], {type: "application/json"})
