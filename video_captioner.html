@@ -138,9 +138,9 @@
 	})
 	var seeking = false
 	var seek_base = 0
-	document.addEventListener('mousedown', (e) => {seeking = true; seek_base = e.clientX})
+	document.addEventListener('mousedown', (e) => {seeking = true; seek_base = e.clientY})
 	document.addEventListener('mousemove', (e) => {
-		if (seeking && Math.abs(e.clientX-seek_base) > 8) video.currentTime += e.movementX/8
+		if (seeking && Math.abs(e.clientY-seek_base) > 4) video.currentTime -= e.movementY/8
 	})
 	document.addEventListener('mouseup', () => {seeking = false})
 	document.addEventListener("dblclick", () => {video.paused ? video.play() : video.pause()})
