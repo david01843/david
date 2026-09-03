@@ -12,10 +12,12 @@
 		p:hover {cursor: pointer; color: red;}
 	</style>
 	<body>
-		<h3>Mobile Download</h3>
-		<a>yt-dlp --cookies /sdcard/Download/cookies.txt -f "bestaudio+worstvideo" "$i"; done; mv *.webm *.m4a *.mp4 /sdcard/Download/</a>
-        <h3>Convert to MP3 on Desktop</h3>
-		<a class="nourl">cd /home/david/Desktop/music/; for f in *.webm *.m4a *.mp4; do ffmpeg -i "$f" "${f%.*}.mp3" -loglevel quiet; done</a>
+        <h3>List Formats</h3>
+		<a>yt-dlp --cookies /sdcard/Download/cookies.txt -F "</a>
+		<h3>Download</h3>
+		<a>yt-dlp --cookies /sdcard/Download/cookies.txt -f "251/140" "$i"; done; mv *.webm *.m4a *.mp4 /sdcard/Download/</a>
+        <h3>Conversion</h3>
+		<a>cd /home/david/Desktop/music/; for f in *.webm *.m4a *.mp4; do ffmpeg -i "$f" "${f%.*}.mp3" -loglevel quiet; done</a>
 		<button>Paste URL</button>
 		<!--
 		Install yt-dlp on Linux Mint:
@@ -32,21 +34,18 @@
 		-->
 	</body>
 	<script>
-		function geturls() {
-			let x = ""
+        const a = document.querySelectorAll("a")
+        a[0].addEventListener("click", (e) => {
+            navigator.clipboard.writeText(e.target.innerHTML+document.querySelector("p").innerHTML+'"')
+        })
+        a[1].addEventListener("click", (e) => {
+            let x = ""
 			for (p of document.querySelectorAll("p")) {x += ` "${p.innerHTML}"`}
-			return 'urls=(|); for i in "${urls[@]}"; do '.replace("|", x)
-		}
-		document.querySelectorAll("a:not(.nourl)").forEach((a) => {
-			a.addEventListener("click", () => {
-				navigator.clipboard.writeText(geturls()+a.innerHTML)
-			})
-		})
-		document.querySelectorAll("a.nourl").forEach((a) => {
-			a.addEventListener("click", () => {
-				navigator.clipboard.writeText(a.innerHTML)
-			})
-		})
+            navigator.clipboard.writeText('urls=(|); for i in "${urls[@]}"; do '.replace("|", x)+e.target.innerHTML)
+        })
+        a[2].addEventListener("click", (e) => {
+            navigator.clipboard.writeText(e.target.innerHTML)
+        })
 		document.querySelector("button").addEventListener("click", async () => {
 			let x = await navigator.clipboard.readText()
 			let y = document.createElement("p")
