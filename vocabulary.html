@@ -20,7 +20,7 @@
 </style>
 <body>
 	<div id="lists"></div>
-	<div id="modes"><p>en text</p><p>ru text</p><p>ru audio</p></div>
+	<div id="modes"><p>en text</p><p>ru text</p><p>ru audio</p><button>remove inactive</button></div>
 	<div id="cards"></div><h2></h2><h1></h1>
 </body>
 <script src="db.js"></script>
@@ -121,5 +121,14 @@
 			speechSynthesis.speak(audio)
 		}
 	})
+
+    button = document.querySelector("button")
+    button.addEventListener("click", () => {
+        // remove all cards that do not have the .on class, then shuffle
+        let offCards = document.querySelectorAll("#cards p:not(.on)")
+        offCards.forEach(card => card.remove())
+        let remainingCards = Array.from(document.querySelectorAll("#cards p"))
+        remainingCards.sort(() => Math.random()-.5).forEach(card => cards.appendChild(card))
+    })
 </script>
 </html>
