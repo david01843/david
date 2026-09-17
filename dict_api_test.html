@@ -21,16 +21,16 @@
             let url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q="
             let res = await fetch(url+encodeURIComponent(txt))
 			let json = await res.json()
-			return json[0][0][0]
+			return json[0].map(j => j[0]).join("")
 		}
         async function myprint(txt) {
             let div = document.createElement("div")
             let en = document.createElement("p")
             let ru = document.createElement("p")
             div.append(en, ru)
-            en.innerHTML = txt; ru.innerHTML = "-"
+            en.innerHTML = txt
             div.addEventListener("mousemove", async () => {
-                if (ru.innerHTML == "-") {
+                if (ru.innerHTML == "") {
                     ru.innerHTML = "translating..."
                     ru.innerHTML = await translate(en.innerHTML)
                 }
