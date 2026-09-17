@@ -3,6 +3,10 @@
 		<meta charset="UTF-8" name="google" content="notranslate">
 	</head>
 	<style>
+        * {font-family: sans-serif; font-size: 12px;}
+        div p {margin: 2px; padding: 0 2em; background: gainsboro;}
+        div p:nth-of-type(2) {color: gainsboro;}
+        div p:nth-of-type(2):hover {color: black;}
 	</style>
 	<body>
         <button>wikt api call</button>
@@ -13,10 +17,23 @@
         const button = document.querySelector("button")
         const ta = document.querySelector("textarea")
         
-        function myprint(txt) {
-            let p = document.createElement("p")
-            p.innerHTML = txt
-            body.appendChild(p)
+        async function translate(txt) {
+            let url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q="
+            let res = await fetch(url+encodeURIComponent(txt))
+			let json = await res.json()
+			return json[0][0][0]
+		}
+        async function myprint(txt) {
+            let div = document.createElement("div")
+            div.append(document.createElement("p"), document.createElement("p"))
+            div[0].innerHTML = txt; div[1].innerHTML = "-"
+            div.addEventListener("mousemove", async () => {
+                if (div[1].innerHTML == "-") {
+                    div[1].innerHTML = "translating..."
+                    div[1].innerHTML = translate(div[0].innerHTML)
+                }
+            }) 
+            body.appendChild(div)
         }
         button.addEventListener("click", async () => {
             let url = `https://en.wiktionary.org/api/rest_v1/page/definition/${ta.value}`
