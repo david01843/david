@@ -5,31 +5,34 @@
 	<style>
 	</style>
 	<body>
-        <button>wikt api test</button>
-        <textarea>hello</textarea>d
+        <button>wikt api call</button>
+        <textarea>hello</textarea>
 	</body>
 	<script>
-        buttons = document.querySelectorAll("button")
-        ta = document.querySelector("textarea")
-        buttons[0].addEventListener("click", async () => {
-            let word = "hello"
+        const body = document.querySelector("body")
+        const button = document.querySelector("button")
+        const ta = document.querySelector("textarea")
+        
+        function myprint(txt) {
+            let p = document.createElement("p")
+            p.innerHTML = txt
+            body.appendChild(p)
+        }
+        button.addEventListener("click", async () => {
             let url = `https://en.wiktionary.org/api/rest_v1/page/definition/${ta.value}`
             let res = await fetch(url)
             let data = await res.json()
-            // actaully can this json be saved as a text file so i can test ocally
-            //const data = await res.json()
-
-// Save as downloadable file
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
-            const a = document.createElement("a")
-            a.href = URL.createObjectURL(blob)
-            a.download = `${ta.value}.json`
-            a.click()
-            URL.revokeObjectURL(a.href)
-            /*let en = data["en"]
-            for (let i of en) {
-                
-            }*/
+            document.querySelectorAll("p").forEach(p => p.remove())
+            for (let pos of data["en"]) {
+                myprint(`[${pos.partOfSpeech}]`)
+                for (let def of pos.definitions) {
+                    myprint(def.definition.replace(/<[^>]*>/g, "").trim())
+                    let exs = def.examples ?? def.parsedExamples?.map(pe => pe.example) ?? []
+                    for (let ex of exs) {
+                        myprint(`----${ex.replace(/<[^>]*>/g, "").trim()}`)
+                    }
+                }
+            }
         })
 	</script>
 </html>
