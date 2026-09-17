@@ -25,12 +25,14 @@
 		}
         async function myprint(txt) {
             let div = document.createElement("div")
-            div.append(document.createElement("p"), document.createElement("p"))
-            div[0].innerHTML = txt; div[1].innerHTML = "-"
+            let en = document.createElement("p")
+            let ru = document.createElement("p")
+            div.append(en, ru)
+            en.innerHTML = txt; ru.innerHTML = "-"
             div.addEventListener("mousemove", async () => {
-                if (div[1].innerHTML == "-") {
-                    div[1].innerHTML = "translating..."
-                    div[1].innerHTML = translate(div[0].innerHTML)
+                if (ru.innerHTML == "-") {
+                    ru.innerHTML = "translating..."
+                    ru.innerHTML = translate(en.innerHTML)
                 }
             }) 
             body.appendChild(div)
