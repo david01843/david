@@ -5,26 +5,18 @@
 	<style>
 	</style>
 	<body>
-        <button>dict api test</button><button>wikt api test</button>
+        <button>wikt api test</button>
+        <textarea>hello</textarea>
 	</body>
 	<script>
         buttons = document.querySelectorAll("button")
+        ta = document.querySelector("textarea")
         buttons[0].addEventListener("click", async () => {
-            console.log("going...")
             let word = "hello"
-            let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-            let data = await response.json()
+            let url = `https://en.wiktionary.org/api/rest_v1/page/definition/${ta.value}`
+            let res = await fetch(url)
+            let data = await res.json()
             console.log(data)
-        })
-        buttons[1].addEventListener("click", async () => {
-            console.log("going...");
-            let word = "hello";
-            // Wiktionary's REST API
-            let url = `https://en.wiktionary.org/api/rest_v1/page/definition/${word}`
-            let res = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            let data = await res.json();
-            console.log(data);
         })
 	</script>
 </html>
