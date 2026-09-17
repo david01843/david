@@ -1,0 +1,37 @@
+<html lang="en"><!--https://colorscheme.ru/html-colors.html-->
+	<head><!--https://dictionaryapi.dev/-->
+		<meta charset="UTF-8" name="google" content="notranslate">
+	</head>
+	<style>
+	</style>
+	<body>
+        <button>test</button>
+	</body>
+	<script>
+        button = document.querySelector("button")
+        button.addEventListener("click", async () => {
+            console.log("going...")
+            let word = "hello"
+            let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+            let data = await response.json()
+            console.log(data)
+            /*
+Usage : The basic syntax of a URL request to the API is shown below:
+
+https://api.dictionaryapi.dev/api/v2/entries/en/<word>
+
+data.forEach(entry => {
+    entry.meanings.forEach(meaning => {
+        meaning.definitions.forEach(def => {
+            const p = document.createElement("p");
+            p.className = "definition";
+            p.innerHTML = `<span class="part">${meaning.partOfSpeech}:</span> ${def.definition}`;
+            output.appendChild(p);
+        });
+    });
+});
+            */
+            // use example word hello
+        })
+	</script>
+</html>
