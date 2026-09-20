@@ -14,9 +14,11 @@
 	<body>
         <h3>List Formats</h3>
 		<a>yt-dlp --cookies /sdcard/Download/cookies.txt -F "</a>
-		<h3>Download</h3>
+		<h3>Download and Move</h3>
 		<a>yt-dlp --cookies /sdcard/Download/cookies.txt -f "251/140" "$i"; done; mv *.webm *.m4a *.mp4 /sdcard/Download/</a>
-        <h3>Conversion</h3>
+        <h3>Move</h3>
+		<a>mv *.webm *.m4a *.mp4 /sdcard/Download/</a>
+        <h3>Convert</h3>
 		<a>cd /home/david/Desktop/music/; for f in *.webm *.m4a *.mp4; do ffmpeg -i "$f" "${f%.*}.mp3" -loglevel quiet; done</a>
 		<button>Paste URL</button>
 		<!--
@@ -44,6 +46,9 @@
             navigator.clipboard.writeText('urls=(|); for i in "${urls[@]}"; do '.replace("|", x)+e.target.innerHTML)
         })
         a[2].addEventListener("click", (e) => {
+            navigator.clipboard.writeText(e.target.innerHTML)
+        })
+        a[3].addEventListener("click", (e) => {
             navigator.clipboard.writeText(e.target.innerHTML)
         })
 		document.querySelector("button").addEventListener("click", async () => {
