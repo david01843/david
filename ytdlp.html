@@ -32,7 +32,7 @@
         const a = document.querySelectorAll("a")
         a[0].addEventListener("click", () => {
             let url = document.querySelector("p").innerHTML
-            let cmd = `yt-dlp --cookies /sdcard/Download/cookies.txt -F "${url}" && read -p "Pick: " x && yt-dlp --cookies /sdcard/Download/cookies.txt -f "$x" "${url}"`
+            let cmd = `yt-dlp --cookies /sdcard/Download/cookies.txt -F "${url}" && read -p "Pick: " x && yt-dlp --cookies /sdcard/Download/cookies.txt -f "$x" "${url}"; mv *.webm *.m4a *.mp4 /sdcard/Download/`
             navigator.clipboard.writeText(cmd)
         })
         a[1].addEventListener("click", (e) => {
