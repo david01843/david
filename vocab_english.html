@@ -216,9 +216,9 @@
         if (e.key == "Enter") {
             let [gl, w] = active.dataset.metadata.split("||")
             if (answer.style.color != GREEN) answer.innerHTML = mode ? data[gl][w].join("<br>") : w
-            else if (shift) active.classList.add("stashed")
-            else if (e.ctrlKey) active.classList.add("dropped")
-            cycle()
+            else if (shift) {active.classList.add("stashed"); cycle()}
+            else if (e.ctrlKey) {active.classList.add("dropped"); cycle()}
+            else cycle()
         }
         if (e.key == "ArrowRight") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
     })
