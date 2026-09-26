@@ -232,7 +232,7 @@
         if (e.key == "Enter") {
             let [gl, w] = active.dataset.metadata.split("||")
             if (answer.style.color != GREEN) {
-                answer.innerHTML = mode ? w : data[gl][w].join("<br>")
+                answer.innerHTML = mode ? data[gl][w].join("<br>") : w
                 answer.style.color = GREEN
             } else if (shift) {active.classList.add("stashed"); cycle()}
             else if (ctrl) {active.classList.add("dropped"); cycle()}
