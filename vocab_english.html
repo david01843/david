@@ -174,19 +174,16 @@
         if (c.length > 0) {
             active = (c.length > 1 && c[0] == active) ? c[1] : c[0]
             let [gl, w] = active.dataset.metadata.split("||")
+            audio.text = w
             if (mode) { // ru to en
                 prompt_data = data[gl][w].sort(() => Math.random()-.5)
                 prompt_i = 0
                 prompt.innerHTML = prompt_data[0]
             } else { // en to ru
                 prompt.innerHTML = w
+                speechSynthesis.cancel(); speechSynthesis.speak(audio)
             }
-            speechSynthesis.cancel(); audio.text = w; speechSynthesis.speak(audio)
-        } else {
-            active = ""
-            prompt.innerHTML = ""
-            audio.text = ""
-        }
+        } else {active = ""; prompt.innerHTML = ""; audio.text = ""}
         answer.innerHTML = ""
         answer.style.color = BLUE
     }
@@ -215,7 +212,7 @@
             if (e.key == "Shift") {
                 shift = 1; label_keys()
             } else if (e.key == "Control") {
-                control = true
+                ctrl = true
             } else if (e.key == "Backspace") {
                 answer.innerHTML = answer.innerHTML.slice(0, -1); check()
             } else if (e.key == "ArrowUp") {
