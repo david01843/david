@@ -188,7 +188,7 @@
         answer.style.color = BLUE
     }
     function check() {
-        if (mode) { // ru to en
+        if (!mode) { // ru to en
             let w = active.dataset.metadata.split("||")[1]
             if (answer.innerHTML == w) {
 			    answer.style.color = GREEN
