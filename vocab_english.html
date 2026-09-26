@@ -23,7 +23,7 @@
     #deck p {background: #777; margin: 1px; height: 20px; width: 20px;}
     #deck p.stashed {background: #333;}
     #deck p.dropped {background: #000;}
-    #prompt, #answer {font-size: 24px; color: #888; min-height: 28px;}
+    #prompt, #answer {font-size: 24px; min-height: 28px; color: #888; text-align: center;}
     #answer {color: rgb(160, 200, 255);} 
     #keyboard div {display: flex;}
     #keyboard div:nth-child(2) {margin-left: 32px;}
@@ -107,6 +107,7 @@
             })
             deck.appendChild(p)
         }
+        cycle()
     }
     let g = document.createElement("p"), i = 0
     Object.keys(data).sort().forEach(gl => {
@@ -177,7 +178,7 @@
             } else { // en to ru
                 prompt.innerHTML = w
             }
-            audio.text = w
+            speechSynthesis.cancel(); audio.text = w; speechSynthesis.speak(audio)
         } else {
             active = ""
             prompt.innerHTML = ""
@@ -191,6 +192,7 @@
             let w = active.dataset.metadata.split("||")[1]
             if (answer.innerHTML == w) {
 			    answer.style.color = GREEN
+                speechSynthesis.cancel(); speechSynthesis.speak(audio)
 		    } else if (answer.innerHTML != w.slice(0, answer.innerHTML.length)) {
 			    answer.style.color = RED
 		    } else {
@@ -214,11 +216,13 @@
             } else if (e.key == "Backspace") {
                 answer.innerHTML = answer.innerHTML.slice(0, -1); check()
             } else if (e.key == "ArrowUp") {
-                prompt_i = (prompt_i+1)%prompt.data.length
+                prompt_i = (prompt_i+1)%prompt_data.length
                 prompt.innerHTML = prompt_data[prompt_i]
             } else if (e.key == "ArrowDown") {
-                prompt_i = (prompt_i+prompt.data.length-1)%prompt.data.length
+                prompt_i = (prompt_i+prompt_data.length-1)%prompt_data.length
                 prompt.innerHTML = prompt_data[prompt_i]
+            } else if (e.key == "ArrowRight") {
+                speechSynthesis.cancel(); speechSynthesis.speak(audio)
             } else {
                 let k = codes.indexOf(e.keyCode)
                 if (k != -1) {
@@ -241,7 +245,7 @@
 </html>
 
 
-
+speechSynthesis.cancel(); speechSynthesis.speak(audio)
 
 
 
