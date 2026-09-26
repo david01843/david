@@ -150,7 +150,7 @@
     })
     controls[1].addEventListener("click", () => {
         [...deck.children].forEach(i => {
-            i.classList.contains("dropped") ? i.remove() : i.classList.remove("stashed")
+            i.classList.contains("dropped") ? i.remove() : i.classList.add("stashed")
         }); cycle()
     })
     controls[2].addEventListener("click", () => {deck.replaceChildren(); cycle()})
