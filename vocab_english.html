@@ -146,14 +146,12 @@
         [...deck.children].forEach(i => {
             i.classList.contains("dropped") ? i.remove() : i.classList.remove("stashed")
         });
-        [...deck.children].sort(() => Math.random()-.5).forEach(i => deck.appendChild(i))
-        cycle()
+        [...deck.children].sort(() => Math.random()-.5).forEach(i => deck.appendChild(i)); cycle()
     })
     controls[1].addEventListener("click", () => {
         [...deck.children].forEach(i => {
             i.classList.contains("dropped") ? i.remove() : i.classList.remove("stashed")
-        })
-        cycle()
+        }); cycle()
     })
     controls[2].addEventListener("click", () => {deck.replaceChildren(); cycle()})
     function write_hints() {
@@ -162,10 +160,7 @@
     }
     write_hints()
     controls[3].addEventListener("click", () => {
-        mode = !mode
-        keyboard.style.visibility = mode ? "hidden" : "visible"
-        write_hints()
-        cycle()
+        mode = !mode; keyboard.style.visibility = mode ? "hidden" : "visible"; write_hints(); cycle()
     })
 
     // operation
@@ -180,10 +175,7 @@
                 prompt_data = data[gl][w].sort(() => Math.random()-.5)
                 prompt_i = 0
                 prompt.innerHTML = prompt_data[0]
-            } else { // en to ru
-                prompt.innerHTML = w
-                speechSynthesis.cancel(); speechSynthesis.speak(audio)
-            }
+            } else {prompt.innerHTML = w; speechSynthesis.cancel(); speechSynthesis.speak(audio)}
         } else {active = ""; prompt.innerHTML = ""; audio.text = ""}
         answer.innerHTML = ""
         answer.style.color = BLUE
@@ -196,12 +188,8 @@
                 speechSynthesis.cancel(); speechSynthesis.speak(audio)
 		    } else if (answer.innerHTML != w.slice(0, answer.innerHTML.length)) {
 			    answer.style.color = RED
-		    } else {
-			    answer.style.color = BLUE
-		    }
-        } else { // en to ru
-            answer.style.color = (answer.innerHTML == "") ? BLUE : GREEN
-        }
+		    } else answer.style.color = BLUE
+        } else answer.style.color = (answer.innerHTML == "") ? BLUE : GREEN
 	}
     window.addEventListener("mouseup", () => {dragging = false})
     window.addEventListener("keyup", (e) => {if (e.key == "Shift") {shift = false; label_keys()}})
