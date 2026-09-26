@@ -215,7 +215,10 @@
         }
         if (e.key == "Enter") {
             let [gl, w] = active.dataset.metadata.split("||")
-            if (answer.style.color != GREEN) answer.innerHTML = mode ? data[gl][w].join("<br>") : w
+            if (answer.style.color != GREEN) {
+                answer.innerHTML = mode ? data[gl][w].join("<br>") : w
+                check()
+            }
             else if (shift) {active.classList.add("stashed"); cycle()}
             else if (e.ctrlKey) {active.classList.add("dropped"); cycle()}
             else cycle()
