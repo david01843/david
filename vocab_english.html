@@ -2,7 +2,10 @@
 <head><meta charset="UTF-8" name="google" content="notranslate"></head>
 <style>
 	* {margin: 0; font-family: sans-serif;}
-    body {display: grid; grid-template-columns: 144px 1fr; height: 100vh; overflow: hidden; background: black;}
+    body {
+        display: grid; grid-template-columns: 144px 1fr; grid-template-rows: 1fr;
+        height: 100vh; overflow: hidden; background: black;
+    }
     #library {width: 128px; overflow-x: hidden; overflow-y: auto; background: #111; padding: 8px;}
     #library::-webkit-scrollbar {display: none;}
     #library p {display: none; color: #999; cursor: pointer; width: fit-content;}
