@@ -175,7 +175,7 @@
             active = (c.length > 1 && c[0] == active) ? c[1] : c[0]
             let [gl, w] = active.dataset.metadata.split("||")
             audio.text = w
-            if (mode) { // ru to en
+            if (!mode) { // ru to en
                 prompt_data = data[gl][w].sort(() => Math.random()-.5)
                 prompt_i = 0
                 prompt.innerHTML = prompt_data[0]
