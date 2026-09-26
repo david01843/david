@@ -208,7 +208,7 @@
         else if (e.key == "Control") {ctrl = false}
     })
     window.addEventListener("keydown", (e) => {
-        if (mode) { // ru to en
+        if (!mode) { // ru to en
             if (e.key == "Shift") {
                 shift = 1; label_keys()
             } else if (e.key == "Control") {
@@ -221,8 +221,6 @@
             } else if (e.key == "ArrowDown") {
                 prompt_i = (prompt_i+prompt_data.length-1)%prompt_data.length
                 prompt.innerHTML = prompt_data[prompt_i]
-            } else if (e.key == "ArrowRight") {
-                speechSynthesis.cancel(); speechSynthesis.speak(audio)
             } else {
                 let k = codes.indexOf(e.keyCode)
                 if (k != -1) {
@@ -240,6 +238,7 @@
             else if (ctrl) {active.classList.add("dropped"); cycle()}
             else {cycle()}
         }
+        if (e.key == "ArrowRight") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
     })
 </script>
 </html>
