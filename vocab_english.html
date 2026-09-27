@@ -155,8 +155,8 @@
     })
     controls[2].addEventListener("click", () => {deck.replaceChildren(); cycle()})
     function write_hints() {
-        hints.innerHTML = "[Enter] to show or keep card.<br>[Shift+Enter] to stash card.<br>[Ctrl+Enter] to drop card.<br>Click and drag cards to keep or stash them.<br>[RightArrow] to play audio."
-        if (mode) hints.innerHTML += "<br>[UpArrow, DownArrow] to rotate definitions."
+        hints.innerHTML = "[Enter] to show or keep card.<br>[Shift+Enter] to stash card.<br>[Ctrl+Enter] to drop card.<br>Click and drag cards to stash or reactivate them.<br>[RightArrow] to play audio."
+        if (!mode) hints.innerHTML += "<br>[UpArrow, DownArrow] to rotate definitions."
     }
     write_hints()
     controls[3].addEventListener("click", () => {
