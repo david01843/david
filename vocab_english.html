@@ -63,7 +63,7 @@
     const BLUE = "rgb(160, 200, 255)", GREEN = "rgb(110, 255, 150)", RED = "rgb(255, 130, 110)"
     var dragging = false // click and dragging on cards in deck
     var keeping = false // click and dragging on cards in deck
-    var shift = false // shift key
+    var shift = 0 // shift key
     var active // p tag
     var prompt_data
     var prompt_i = 0
@@ -138,7 +138,7 @@
     })
 
     // keyboard init
-    function label_keys() {keys.forEach((k, i) => {k.innerHTML = chars[1*shift][i]})}
+    function label_keys() {keys.forEach((k, i) => {k.innerHTML = chars[shift][i]})}
     label_keys()
 
     // controls init
@@ -192,11 +192,11 @@
         } else answer.style.color = (answer.innerHTML == "") ? BLUE : GREEN
 	}
     window.addEventListener("mouseup", () => {dragging = false})
-    window.addEventListener("keyup", (e) => {if (e.key == "Shift") {shift = false; label_keys()}})
+    window.addEventListener("keyup", (e) => {if (e.key == "Shift") {shift = 0; label_keys()}})
     window.addEventListener("keydown", (e) => {
         if (!mode) { // ru to en
             if (e.key == "Shift") {
-                shift = true; label_keys()
+                shift = 1; label_keys()
             } else if (e.key == "Backspace") {
                 answer.innerHTML = answer.innerHTML.slice(0, -1); check()
             } else if (e.key == "ArrowUp") {
@@ -208,7 +208,7 @@
             } else {
                 let k = codes.indexOf(e.keyCode)
                 if (k != -1) {
-                    answer.innerHTML += chars[1*shift][k]; check(); keys[k].classList.add("typed")
+                    answer.innerHTML += chars[shift][k]; check(); keys[k].classList.add("typed")
                     setTimeout(() => {keys[k].classList.remove("typed")}, 300)
                 }
             }
@@ -216,14 +216,13 @@
         if (e.key == "Enter") {
             let [gl, w] = active.dataset.metadata.split("||")
             if (answer.style.color != GREEN) {
-                answer.innerHTML = mode ? data[gl][w].join("<br>") : w
-                check()
+                answer.innerHTML = mode ? data[gl][w].join("<br>") : w; check()
             }
-            else if (shift) {active.classList.add("stashed"); cycle()}
+            else if (e.shiftKey) {active.classList.add("stashed"); cycle()}
             else if (e.ctrlKey) {active.classList.add("dropped"); cycle()}
             else cycle()
         }
-        if (e.key == "ArrowRight") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
+        else if (e.key == "ArrowRight") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
     })
 </script>
 </html>
