@@ -1,0 +1,152 @@
+<html lang="en"><!--https://colorscheme.ru/html-colors.html-->
+<head><meta charset="UTF-8" name="google" content="notranslate"></head>
+<style>
+	* {margin: 0; font-family: sans-serif;}
+    body {
+        display: grid; grid-template-rows: repeat(5, auto) 1fr auto; grid-gap: 16px;
+        margin: 16px; width: calc(100vw - 32px); height: calc(100vh - 32px);
+        justify-items: center; background: black;
+    }
+    input {background: plum; border-radius: 10px;}
+    #deck {
+        height: 231px; width: fit-content; max-width: calc(100vw - 224px);
+        display: flex; flex-direction: column; flex-wrap: wrap; user-select: none;
+        align-content: flex-start; align-items: center; overflow-x: scroll;
+    }
+    #deck::-webkit-scrollbar {height: 8px;}
+    #deck::-webkit-scrollbar-thumb {background: #444; border-radius: 4px;}
+    #deck::-webkit-scrollbar-track {background: black;}
+    #deck p {background: #777; margin: 1px; height: 20px; width: 20px;}
+    #deck p.disabled {background: #444;}
+    #deck p.removed {background: #000;}
+    p {text-align: center;}
+    #controls p {
+        color: skyblue; background: #000; border: solid 2px skyblue;
+        display: inline-block; margin: 0 6px; padding: 4px 12px; font-size: 14px; border-radius: 16px;
+    }
+    #controls p:hover {cursor: pointer;}
+    #controls p:focus {outline: none;}
+    #word {font-size: 24px; color: #888;}
+    #synonyms {font-size: 24px; color: palegreen;}
+    #description {font-size: 20px; color: sandybrown; margin-top: 3px;}
+    #keys {grid-row: 7; font-size: 14px; font-style: italic; color: #666}
+</style>
+<body>
+    <input type="file" accept=".ods">
+    <div id="controls"><p>Shuffle</p><p>Enable All</p><p>Disable All</p><p>Remove 30%</p><p>Remove All</p><p>Download</p></div>
+    <div id="deck"></div>
+    <p id="word"></p>
+    <p id="synonyms"></p>
+    <p id="description"></p>
+    <p id="keys">[D] Show translation, keep card<br>[A] Disable card<br>[W] Remove card<br>[S] Play word<br>Click and drag cards to toggle them</p>
+</body>
+<script src="xlsx.full.min.js"></script>
+<script>
+    var dragging = false // click and dragging on cards in deck
+    var keeping = false // click and dragging on cards in deck
+    var active = document.createElement("p")
+    const audio = new SpeechSynthesisUtterance()
+    const inputs = document.querySelectorAll("input")
+    const deck = document.querySelector("#deck")
+    const word = document.querySelector("#word")
+    const synonyms = document.querySelector("#synonyms")
+    const description = document.querySelector("#description")
+    const controls = document.querySelectorAll("#controls p")
+
+    // add words to deck
+    inputs[0].addEventListener("change", (e1) => { // add words
+        inputs[0].blur() // release focus
+        const file = e1.target.files[0]
+        const reader = new FileReader()
+        reader.onload = function(e2) {
+            const data = new Uint8Array(e2.target.result)
+            const wb = XLSX.read(data, {type: "array"})
+            const ws = wb.Sheets[wb.SheetNames[0]]
+            const rows = XLSX.utils.sheet_to_json(ws, {header: 1})
+            deck.replaceChildren()
+            rows.forEach((row, r) => {
+                const p = document.createElement("p")
+                p.dataset.metadata = row[0]+"|"+row[1]+"|"+(row[2] ?? "")
+                p.addEventListener("mousedown", () => {
+                    if (!p.classList.contains("removed")) {            
+                        dragging = true
+                        keeping = p.classList.contains("disabled")
+                        p.classList.toggle("disabled")
+                    }
+                })
+                p.addEventListener("mouseenter", () => {
+                    if (dragging && !p.classList.contains("removed")) {
+                        keeping ? p.classList.remove("disabled") : p.classList.add("disabled")
+                    } 
+                })
+                deck.appendChild(p)
+                if (r == 0) {
+                    const latin = (row[0].match(/[a-z]/gi) || []).length
+                    const cyrillic = (row[0].match(/[а-яё]/gi) || []).length
+                    audio.lang = latin > cyrillic ? "en" : "ru"
+                }
+            })
+            cycle()
+        }
+        reader.readAsArrayBuffer(file)
+    })
+
+    // controls
+    function clean() {[...deck.children].forEach(i => {if (i.classList.contains("removed")) i.remove()})}
+    controls[0].addEventListener("click", () => {
+        clean(); [...deck.children].sort(() => Math.random()-.5).forEach(i => deck.appendChild(i)); cycle()
+    })
+    controls[1].addEventListener("click", () => {
+        clean(); [...deck.children].forEach(i => i.classList.remove("disabled")); cycle()
+    })
+    controls[2].addEventListener("click", () => {
+        clean(); [...deck.children].forEach(i => i.classList.add("disabled")); cycle()
+    })
+    controls[3].addEventListener("click", () => {
+        clean(); [...deck.children].forEach(c => {if (Math.random() < .3) c.remove()}); cycle()
+    })
+    controls[4].addEventListener("click", () => {deck.replaceChildren(); cycle()})
+    controls[5].addEventListener("click", () => {
+        const rows = [...deck.children]
+            .filter(w => !w.classList.contains("removed"))
+            .map(w => w.dataset.metadata.split("|"))
+            .sort((a, b) => a[0].localeCompare(b[0], audio.lang))
+        const ws = XLSX.utils.aoa_to_sheet(rows)
+        const wb = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1")
+        XLSX.writeFile(wb, "vocabulary_subgroup.ods", {bookType: "ods"})
+    })
+
+    // operation
+    function cycle() {
+        let c = [...deck.querySelectorAll(":scope > :not(.disabled, .removed)")]
+        c.sort(() => Math.random()-.5)
+        if (c.length > 0) {
+            active = (c.length > 1 && c[0] == active) ? c[1] : c[0]
+            const md = active.dataset.metadata.split("|")
+            word.innerHTML = md[0]
+            audio.text = md[0]; speechSynthesis.cancel(); speechSynthesis.speak(audio)
+        } else {
+            active = ""
+            word.innerHTML = ""
+            audio.text = ""
+        }
+        synonyms.innerHTML = ""
+        description.innerHTML = ""
+    }
+    window.addEventListener("mouseup", () => {dragging = false})
+    window.addEventListener("keydown", (e) => {
+        if (e.code == "KeyD") {
+            if (synonyms.innerHTML != "" || !active) cycle()
+            else {
+                const md = active.dataset.metadata.split("|")
+                synonyms.innerHTML = md[1]
+                description.innerHTML = md[2]
+            }
+        }
+        else if (e.code == "KeyA") {active.classList.add("disabled"); cycle()}
+        else if (e.code == "KeyW") {active.classList.add("removed"); cycle()}
+        else if (e.code == "KeyS") speechSynthesis.cancel(); speechSynthesis.speak(audio)
+    })
+</script>
+</html>
