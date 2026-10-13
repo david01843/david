@@ -32,7 +32,7 @@
     #keys {grid-row: 7; font-size: 14px; font-style: italic; color: #666}
 </style>
 <body>
-    <input type="file" accept=".ods">
+    <input type="file" accept=".xlsx, .xls, .ods">
     <div id="controls"><p>Shuffle</p><p>Enable All</p><p>Disable All</p><p>Remove 30%</p><p>Remove All</p><p>Download</p></div>
     <div id="deck"></div>
     <p id="word"></p>
@@ -146,7 +146,7 @@
         }
         else if (e.code == "KeyA") {active.classList.add("disabled"); cycle()}
         else if (e.code == "KeyW") {active.classList.add("removed"); cycle()}
-        else if (e.code == "KeyS") speechSynthesis.cancel(); speechSynthesis.speak(audio)
+        else if (e.code == "KeyS") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
     })
 </script>
 </html>
