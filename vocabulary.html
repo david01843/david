@@ -33,7 +33,7 @@
 </style>
 <body>
     <input type="file" accept=".xlsx, .xls, .ods">
-    <div id="controls"><p>Shuffle</p><p>Enable All</p><p>Disable All</p><p>Remove 30%</p><p>Remove All</p><p>Download</p></div>
+    <div id="controls"><p>Shuffle</p><p>Enable All</p><p>Disable All</p><p>Remove 30%</p><p>Download</p></div>
     <div id="deck"></div>
     <p id="word"></p>
     <p id="synonyms"></p>
@@ -105,8 +105,7 @@
     controls[3].addEventListener("click", () => {
         clean(); [...deck.children].forEach(c => {if (Math.random() < .3) c.remove()}); cycle()
     })
-    controls[4].addEventListener("click", () => {deck.replaceChildren(); cycle()})
-    controls[5].addEventListener("click", () => {
+    controls[4].addEventListener("click", () => {
         const rows = [...deck.children]
             .filter(w => !w.classList.contains("removed"))
             .map(w => w.dataset.metadata.split("|"))
