@@ -38,7 +38,7 @@
     <p id="word"></p>
     <p id="synonyms"></p>
     <p id="description"></p>
-    <p id="keys">[D] Show translation, keep card<br>[A] Disable card<br>[W] Remove card<br>[S] Play word<br>Click and drag cards to toggle them</p>
+    <p id="keys">[D] Show translation, keep card<br>[S] Disable card<br>[W] Remove card<br>[A] Play word<br>Click and drag cards to toggle them</p>
 </body>
 <script src="xlsx.full.min.js"></script>
 <script>
@@ -144,9 +144,9 @@
                 description.innerHTML = md[2]
             }
         }
-        else if (e.code == "KeyA") {active.classList.add("disabled"); cycle()}
+        else if (e.code == "KeyS") {active.classList.add("disabled"); cycle()}
         else if (e.code == "KeyW") {active.classList.add("removed"); cycle()}
-        else if (e.code == "KeyS") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
+        else if (e.code == "KeyA") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
     })
 </script>
 </html>
