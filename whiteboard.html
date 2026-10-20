@@ -11,25 +11,15 @@
                 position: absolute; z-index: 3; width: 512px;
                 font-family: sans-serif; font-size: 18px;
             }
-            #cursor {position: absolute; z-index: 4; width: 2px; height: 2px; pointer-events: none;}
-            /*#keyboard {position: absolute; z-index: 5; top: 3px; left: 3px;}
-            #keyboard div:nth-child(2) {margin-left: 21px;}
-            #keyboard div:nth-child(3) {margin-left: 25px;}
-            #keyboard div:nth-child(4) {margin-left: 30px;}
-            #keyboard div:nth-child(3) p:nth-child(n+1):nth-child(-n+4),
-            #keyboard div:nth-child(3) p:nth-child(n+7):nth-child(-n+10) {background: lightsteelblue;}
-            #keyboard div p {
-                display: inline-block; font-size: 11px; width: 14px; line-height: 14px;
-                text-align: center; color: black; background: gainsboro; 
-            }
-            #keyboard .typed {background: steelblue !important;}*/
+            #controls {position: absolute; z-index: 4; display: flex;}
+            button {height: 22px;}
+            button:nth-child(2) {background: green; width: 22px;}
 		</style>
 	</head>
 	<body>
         <canvas></canvas><canvas></canvas>
         <p id="text"></p>
-        <div id="cursor"></div>
-        <!--<div id="keyboard"><div></div><div></div><div></div><div></div></div><!--13-13-11-10-->
+        <div id="controls"><button>clipboard</button><button></button><button>draw</button></div>
     </body>
     <script src="html2canvas.min.js"></script>
 	<script>
@@ -39,35 +29,17 @@
 		const canvas = document.querySelectorAll("canvas")
 		const ctx = [canvas[0].getContext("2d"), canvas[1].getContext("2d")]
 		const text = document.querySelector("#text")
-        const cursor = document.querySelector("#cursor") // cursor
-        var drawmode = 0 // 0 = off, 1 = draw, 2 = erase
-        var drawtool = 0 // 0 = pencil, 1 = highlighter
-		var drawtime = 0
+        const controls = document.querySelectorAll("button")
+        
 		var xyd = [0, 0] // set on mousedown
 		var xym = [0, 0] // set on mousemove
 		var texthistory = "" // text history
-        const colors = ["green", "orange", "crimson"]
+        
+        const drawmode = ["draw", "highlight", "erase"]
+        var dm = 0
+        var drawing = false
+        const color = ["green", "orange", "crimson"]
         var c = 0
-
-        /*// keyboard
-        const chars = [
-            "ё1234567890-=йцукенгшщзхъ\\фывапролджэячсмитьбю.",
-            'Ё!"№;%:?*()_+ЙЦУКЕНГШЩЗХЪ/ФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,',
-            "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./",
-            '~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?']
-        const codes = [192, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 189, 187,
-            81, 87, 69, 82, 84, 89, 85, 73, 79, 80, 219, 221, 220,
-            65, 83, 68, 70, 71, 72, 74, 75, 76, 186, 222,
-            90, 88, 67, 86, 66, 78, 77, 188, 190, 191]
-        var lang = 0
-        var shift = 0
-        const keyboard = document.querySelector("#keyboard")
-        const keyrows = document.querySelectorAll("#keyboard div")
-            for (let i = 0; i < 13; i++) {keyrows[0].appendChild(document.createElement("p"))}
-            for (let i = 0; i < 13; i++) {keyrows[1].appendChild(document.createElement("p"))}
-            for (let i = 0; i < 11; i++) {keyrows[2].appendChild(document.createElement("p"))}
-            for (let i = 0; i < 10; i++) {keyrows[3].appendChild(document.createElement("p"))}
-        const keys = document.querySelectorAll("#keyboard div p")*/
 
         // initiation
         function resize() {
@@ -80,10 +52,6 @@
         }		
         window.addEventListener("load", resize)
         window.addEventListener("resize", resize)
-        body.style.cursor = "none"
-        cursor.style.backgroundColor = colors[c]
-        /*function label_keys() {keys.forEach((k, i) => {k.innerHTML = chars[2*lang+shift][i]})}
-        label_keys()*/
 		
 		// typing
 		async function translate(t) {
@@ -113,58 +81,33 @@
             } else if (e.key == "Backspace") {
 				text.innerHTML = text.innerHTML.slice(0, -1)
 			} else if (e.key == "Enter") {
+                ctx[0].globalCompositeOperation = "source-over"
+                ctx[1].globalCompositeOperation = "source-over"
 				if (text.innerHTML) await drawtext(e.shiftKey)
                 text.innerHTML = ""
 			} else if (e.key == "Escape") {
                 text.innerHTML = ""
-			} else if (e.key == "ArrowLeft") {
-				drawtool = (drawtool+1)%2
-                cursor.style.height = drawtool ? "16px" : "2px"
-			} else if (e.key == "ArrowRight") {
-				c = (c+1)%colors.length
-                cursor.style.backgroundColor = colors[c]
             } else if (e.key == "ArrowUp") {
 				text.innerHTML = texthistory
 			}
-            /*const k = codes.indexOf(e.keyCode)			
-            if (k != -1) {
-                text.innerHTML += chars[2*lang+shift][k]; keys[k].classList.add("typed")
-                setTimeout(() => {keys[k].classList.remove("typed")}, 300)
-            } else if (e.key == "Control") {
-				lang = (lang+1)%2; label_keys()
-			} else if (e.key == "Shift") {
-				shift = 1; label_keys()
-			} else if (e.code == "Space") {
-                text.innerHTML += " "
-            }*/
 		})
-        /*window.addEventListener("keyup", (e) => {
-            if (e.key == "Shift") {shift = 0; label_keys()}
-        })*/
 		
-		// highlight, erase
+		// draw, highlight, erase
 		canvas[1].addEventListener("mousedown", (e) => {
 			xyd = [e.clientX, e.clientY]
-			if (Date.now()-drawtime > 200) { // highlight
-				drawmode = 1
-			} else { // erase
-				ctx[0].globalCompositeOperation = "destination-out"
-				ctx[1].globalCompositeOperation = "destination-out"
-				drawmode = 2
-			}
-			drawtime = Date.now()
+            ctx[0].globalCompositeOperation = (dm == 2) ? "destination-out" : "source-over"
+            ctx[1].globalCompositeOperation = (dm == 2) ? "destination-out" : "source-over"
+            drawing = true
 		})
 		canvas[1].addEventListener("mousemove", (e) => {
 			xym = [e.clientX, e.clientY]
 			text.style.left = xym[0]-1; text.style.top = xym[1]-10
-            cursor.style.left = xym[0]-1
-            cursor.style.top = drawtool ? xym[1]-8 : xym[1]-1
-            if (drawmode == 1 && drawtool == 0) { // pencil
+            if (dm == 0 && drawing) { // draw
                 ctx[1].beginPath(); ctx[1].moveTo(xym[0]+1, xym[1]+1)
                 ctx[1].lineTo(xym[0]+1-e.movementX, xym[1]+1-e.movementY)
-				ctx[1].strokeStyle = colors[c]
+				ctx[1].strokeStyle = color[c]
                 ctx[1].lineWidth = 2; ctx[1].stroke()
-			} else if (drawmode == 2) { // erase
+			} else if (dm == 2 && drawing) { // erase
 				ctx[0].beginPath(); ctx[0].moveTo(xym[0], xym[1])
 				ctx[0].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
                 ctx[0].lineWidth = 32; ctx[0].stroke()
@@ -174,18 +117,27 @@
 			}
 		})
 		canvas[1].addEventListener("mouseup", () => {
-			if (drawmode == 1 && drawtool == 1) { // highlighter
+			if (dm == 1) { // highlight
 				ctx[0].beginPath()
 				ctx[0].moveTo(xyd[0]-2, xyd[1]-8); ctx[0].lineTo(xyd[0]-2, xyd[1]+8)
 				ctx[0].lineTo(xym[0]+2, xym[1]+8); ctx[0].lineTo(xym[0]+2, xym[1]-8)
 				ctx[0].closePath()
-                ctx[0].fillStyle = `color-mix(in srgb, ${colors[c]} 25%, white)`
+                ctx[0].fillStyle = `color-mix(in srgb, ${color[c]} 25%, white)`
                 ctx[0].fill()
-			} else if (drawmode == 2) { // erase
-				ctx[0].globalCompositeOperation = "source-over"
-				ctx[1].globalCompositeOperation = "source-over"
 			}
-			drawmode = 0
+            drawing = false
 		})
+        controls[0].addEventListener("click", async () => {
+            text.innerHTML = await navigator.clipboard.readText()
+            controls[0].blur()
+        })
+        controls[1].addEventListener("click", () => {
+            c = (c+1)%color.length
+            controls[1].style.backgroundColor = color[c]
+        })
+        controls[2].addEventListener("click", () => {
+            dm = (dm+1)%drawmode.length
+            controls[2].innerHTML = drawmode[dm]
+        })
 	</script>
 </html>
