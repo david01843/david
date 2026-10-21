@@ -9,17 +9,18 @@
 			canvas:nth-child(2) {z-index: 2;}
 			#text {
                 position: absolute; z-index: 3; width: 512px;
-                font-family: sans-serif; font-size: 18px;
+                font-family: sans-serif; font-size: 18px; white-space: pre-wrap;
             }
             #controls {position: absolute; z-index: 4; display: flex;}
             button {height: 22px;}
-            button:nth-child(2) {background: green; width: 22px;}
+            button:nth-child(1) {background: black; width: 22px;}
+            button:nth-child(2) {width: 88px;}
 		</style>
 	</head>
 	<body>
         <canvas></canvas><canvas></canvas>
         <p id="text"></p>
-        <div id="controls"><button>clipboard</button><button></button><button>draw</button></div>
+        <div id="controls"><button></button><button>draw</button></div>
     </body>
     <script src="html2canvas.min.js"></script>
 	<script>
@@ -34,11 +35,12 @@
 		var xyd = [0, 0] // set on mousedown
 		var xym = [0, 0] // set on mousemove
 		var texthistory = "" // text history
+        var lastarrowup = Date.now()
         
         const drawmode = ["draw", "highlight", "erase"]
         var dm = 0
         var drawing = false
-        const color = ["green", "orange", "crimson"]
+        const color = ["black", "green", "orange", "crimson"]
         var c = 0
 
         // initiation
@@ -88,7 +90,8 @@
 			} else if (e.key == "Escape") {
                 text.innerHTML = ""
             } else if (e.key == "ArrowUp") {
-				text.innerHTML = texthistory
+                text.textContent = (Date.now()-lastarrowup < 200) ? await navigator.clipboard.readText() : texthistory
+                lastarrowup = Date.now()
 			}
 		})
 		
@@ -127,17 +130,16 @@
 			}
             drawing = false
 		})
-        controls[0].addEventListener("click", async () => {
-            text.innerHTML = await navigator.clipboard.readText()
+        controls[0].addEventListener("click", () => {
+            c = (c+1)%color.length
+            text.style.color = color[c]
+            controls[0].style.backgroundColor = color[c]
             controls[0].blur()
         })
         controls[1].addEventListener("click", () => {
-            c = (c+1)%color.length
-            controls[1].style.backgroundColor = color[c]
-        })
-        controls[2].addEventListener("click", () => {
             dm = (dm+1)%drawmode.length
-            controls[2].innerHTML = drawmode[dm]
+            controls[1].innerHTML = drawmode[dm]
+            controls[1].blur()
         })
 	</script>
 </html>
