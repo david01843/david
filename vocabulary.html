@@ -33,14 +33,14 @@
 </style>
 <body>
     <input type="file" accept=".xlsx, .xls, .ods">
-    <div id="controls"><p>Shuffle</p><p>Enable All</p><p>Disable All</p><p>Remove 30%</p><p>Download</p></div>
+    <div id="controls"><p>Shuffle</p><p>Enable All</p><p>Disable All</p><p>Remove 30%</p></div>
     <div id="deck"></div>
     <p id="word"></p>
     <p id="synonyms"></p>
     <p id="description"></p>
-    <p id="keys">[D] Show translation, keep card<br>[S] Disable card<br>[W] Remove card<br>[A] Play word<br>Click and drag cards to toggle them</p>
+    <p id="keys">D&ensp;➡&emsp;show/keep card<br>S&ensp;⬇&emsp;disable card<br>W&ensp;⬆&emsp;remove card<br>A&ensp;⬅&emsp;speak word<br>Click and drag cards to enable/disable</p>
 </body>
-<script src="xlsx.full.min.js"></script>
+<!--<script src="xlsx.full.min.js"></script>-->
 <script>
     var dragging = false // click and dragging on cards in deck
     var keeping = false // click and dragging on cards in deck
@@ -105,7 +105,7 @@
     controls[3].addEventListener("click", () => {
         clean(); [...deck.children].forEach(c => {if (Math.random() < .3) c.remove()}); cycle()
     })
-    controls[4].addEventListener("click", () => {
+    /*controls[4].addEventListener("click", () => {
         const rows = [...deck.children]
             .filter(w => !w.classList.contains("removed"))
             .map(w => w.dataset.metadata.split("|"))
@@ -114,7 +114,7 @@
         const wb = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(wb, ws, "Sheet1")
         XLSX.writeFile(wb, "vocabulary_subgroup.ods", {bookType: "ods"})
-    })
+    })*/
 
     // operation
     function cycle() {
@@ -135,7 +135,7 @@
     }
     window.addEventListener("mouseup", () => {dragging = false})
     window.addEventListener("keydown", (e) => {
-        if (e.code == "KeyD") {
+        if (e.code == "KeyD" || e.key == "ArrowRight") {
             if (synonyms.innerHTML != "" || !active) cycle()
             else {
                 const md = active.dataset.metadata.split("|")
@@ -143,9 +143,9 @@
                 description.innerHTML = md[2]
             }
         }
-        else if (e.code == "KeyS") {active.classList.add("disabled"); cycle()}
-        else if (e.code == "KeyW") {active.classList.add("removed"); cycle()}
-        else if (e.code == "KeyA") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
+        else if (e.code == "KeyS" || e.key == "ArrowDown") {active.classList.add("disabled"); cycle()}
+        else if (e.code == "KeyW" || e.key == "ArrowUp") {active.classList.add("removed"); cycle()}
+        else if (e.code == "KeyA" || e.key == "ArrowLeft") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
     })
 </script>
 </html>
