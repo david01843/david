@@ -1,0 +1,57 @@
+<html lang='en'><!--https://htmlcolorcodes.com/color-names/-->
+	<head>
+		<meta charset='UTF-8' name='google' content='notranslate'>
+	</head>
+	<style>
+        * {margin: 0;}
+        body {display: grid;}
+        p {
+            display: flex; justify-content: center; align-items: center;
+            font-size: 200px; font-family: Arial; font-weight: bold; background: gray;
+        }
+	</style>
+	<body>
+        <p>00:00</p>
+	</body>
+	<script>
+        const p = document.querySelector("p")
+        var mode = false
+        var time = 0
+        var timeout
+
+        const ac = new AudioContext()
+        function note(waveform, frequency, delay, duration) { // sine sawtooth triangle square
+            const o = ac.createOscillator()
+            o.type = waveform; o.frequency.value = frequency; o.connect(ac.destination)
+            setTimeout(() => o.start(), delay)
+            setTimeout(() => o.stop(ac.currentTime), delay+duration)
+        }
+        function tune(tag) {
+            p.innerHTML = "00:00"
+            note("triangle", 659, 0, 100); note("triangle", 784, 100, 100); note("triangle", 880, 200, 100)
+            note("triangle", 784, 300, 100); note("triangle", 659, 400, 200); note("triangle", 587, 600, 100)
+            note("triangle", 784, 700, 100); note("triangle", 880, 800, 100); note("triangle", 1047, 900, 200)
+            note("triangle", 880, 1100, 100); note("triangle", 659, 1200, 100); note("triangle", 523, 1300, 267)
+        }
+
+        function tick(tag) {
+            const m = String(Math.floor(time/60)).padStart(2, "0")
+            const s = String(time%60).padStart(2, "0")
+            p.innerHTML = m+":"+s
+            timeout = setTimeout(() => {
+                if (time == 0) {
+                    tune()
+                } else {
+                    tick()
+                }
+            }, 1000)
+            time--
+        }
+        
+        p.addEventListener("click", (e) => {
+            if (mode) {p.style.backgroundColor = "#060"; time = 300}
+            else {p.style.backgroundColor = "#800"; time = 1200}
+            mode = !mode; clearTimeout(timeout); tick()
+        })
+	</script>
+</html>
