@@ -8,19 +8,24 @@
 			canvas:nth-child(1) {z-index: 1;}
 			canvas:nth-child(2) {z-index: 2;}
 			#text {
-                position: absolute; z-index: 3; width: 512px;
+                position: absolute; z-index: 3; max-width: 384px;
                 font-family: sans-serif; font-size: 18px; white-space: pre-wrap;
             }
-            #controls {position: absolute; z-index: 4; display: flex;}
-            button {height: 22px;}
-            button:nth-child(1) {background: black; width: 22px;}
-            button:nth-child(2) {width: 88px;}
+            #buttons {
+                position: absolute; left: 50%; transform: translateX(-50%);
+                z-index: 4; display: flex;
+            }
+            button {height: 20px; width: 24px;}
+            button:nth-child(1) {background: black}
+            button:nth-child(2) {background: green}
+            button:nth-child(3) {background: orange}
+            button:nth-child(4) {background: crimson}
 		</style>
 	</head>
 	<body>
         <canvas></canvas><canvas></canvas>
         <p id="text"></p>
-        <div id="controls"><button></button><button>draw</button></div>
+        <div id="buttons"><button></button><button></button><button></button><button></button></div>
     </body>
     <script src="html2canvas.min.js"></script>
 	<script>
@@ -30,18 +35,16 @@
 		const canvas = document.querySelectorAll("canvas")
 		const ctx = [canvas[0].getContext("2d"), canvas[1].getContext("2d")]
 		const text = document.querySelector("#text")
-        const controls = document.querySelectorAll("button")
+        const buttons = document.querySelectorAll("button")
         
 		var xyd = [0, 0] // set on mousedown
 		var xym = [0, 0] // set on mousemove
-		var texthistory = "" // text history
+		var texthistory = ""
         var lastarrowup = Date.now()
-        
-        const drawmode = ["draw", "highlight", "erase"]
-        var dm = 0
-        var drawing = false
-        const color = ["black", "green", "orange", "crimson"]
-        var c = 0
+        var lastclick = Date.now()
+        var marking = false
+        var erasing = false
+        var color = "black"
 
         // initiation
         function resize() {
@@ -49,11 +52,21 @@
             canvas[0].style.width = WIDTH+"px"; canvas[1].style.width = WIDTH+"px"
 			HEIGHT = body.clientHeight; canvas[0].height = HEIGHT; canvas[1].height = HEIGHT
 			canvas[0].style.height = HEIGHT+"px"; canvas[1].style.height = HEIGHT+"px"
-			ctx[0].lineCap = "round"; ctx[1].lineCap = "round"
-			ctx[0].lineJoin = "round"; ctx[1].lineJoin = "round"
+			ctx[1].lineCap = "round"
+			ctx[1].lineJoin = "round"
         }		
         window.addEventListener("load", resize)
         window.addEventListener("resize", resize)
+        body.style.cursor = "crosshair"
+        buttons.forEach(b => {
+            b.addEventListener("click", (e) => {
+                color = getComputedStyle(e.target).backgroundColor
+                text.style.color = color
+                ctx[1].strokeStyle = color
+                ctx[0].fillStyle = `color-mix(in srgb, ${color} 25%, white)`
+                e.target.blur()
+            })
+        })
 		
 		// typing
 		async function translate(t) {
@@ -83,8 +96,6 @@
             } else if (e.key == "Backspace") {
 				text.innerHTML = text.innerHTML.slice(0, -1)
 			} else if (e.key == "Enter") {
-                ctx[0].globalCompositeOperation = "source-over"
-                ctx[1].globalCompositeOperation = "source-over"
 				if (text.innerHTML) await drawtext(e.shiftKey)
                 text.innerHTML = ""
 			} else if (e.key == "Escape") {
@@ -96,50 +107,54 @@
 		})
 		
 		// draw, highlight, erase
+        window.addEventListener("wheel", () => {
+            body.style.cursor = (body.style.cursor == "text") ? "crosshair" : "text"
+        })
 		canvas[1].addEventListener("mousedown", (e) => {
 			xyd = [e.clientX, e.clientY]
-            ctx[0].globalCompositeOperation = (dm == 2) ? "destination-out" : "source-over"
-            ctx[1].globalCompositeOperation = (dm == 2) ? "destination-out" : "source-over"
-            drawing = true
+            if (Date.now()-lastclick > 200) {
+                marking = true
+                ctx[0].globalCompositeOperation = "source-over"
+                ctx[0].lineWidth = 2
+                ctx[1].globalCompositeOperation = "source-over"
+                ctx[1].lineWidth = 2
+                //ctx[1].strokeStyle = color
+            } else {
+                erasing = true
+                ctx[0].globalCompositeOperation = "destination-out"
+                ctx[0].lineWidth = 32
+                ctx[1].globalCompositeOperation = "destination-out"
+                ctx[1].lineWidth = 32
+            }
+            lastclick = Date.now()
 		})
 		canvas[1].addEventListener("mousemove", (e) => {
 			xym = [e.clientX, e.clientY]
 			text.style.left = xym[0]-1; text.style.top = xym[1]-10
-            if (dm == 0 && drawing) { // draw
-                ctx[1].beginPath(); ctx[1].moveTo(xym[0]+1, xym[1]+1)
-                ctx[1].lineTo(xym[0]+1-e.movementX, xym[1]+1-e.movementY)
-				ctx[1].strokeStyle = color[c]
-                ctx[1].lineWidth = 2; ctx[1].stroke()
-			} else if (dm == 2 && drawing) { // erase
-				ctx[0].beginPath(); ctx[0].moveTo(xym[0], xym[1])
-				ctx[0].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
-                ctx[0].lineWidth = 32; ctx[0].stroke()
-				ctx[1].beginPath(); ctx[1].moveTo(xym[0], xym[1])
-				ctx[1].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
-                ctx[1].lineWidth = 32; ctx[1].stroke()
+            if (marking && body.style.cursor == "crosshair" || erasing) {
+                ctx[0].beginPath()
+                ctx[0].moveTo(xym[0], xym[1])
+                ctx[0].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
+				ctx[0].stroke()
+                ctx[1].beginPath()
+                ctx[1].moveTo(xym[0], xym[1])
+                ctx[1].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
+				ctx[1].stroke()
 			}
 		})
 		canvas[1].addEventListener("mouseup", () => {
-			if (dm == 1) { // highlight
+			if (marking && body.style.cursor == "text") {
 				ctx[0].beginPath()
-				ctx[0].moveTo(xyd[0]-2, xyd[1]-8); ctx[0].lineTo(xyd[0]-2, xyd[1]+8)
-				ctx[0].lineTo(xym[0]+2, xym[1]+8); ctx[0].lineTo(xym[0]+2, xym[1]-8)
+                ctx[0].moveTo(xyd[0]-2, xyd[1]-8)
+                ctx[0].lineTo(xym[0]+2, xym[1]-8)
+                ctx[0].lineTo(xym[0]+2, xym[1]+8)
+                ctx[0].lineTo(xyd[0]-2, xyd[1]+8)
 				ctx[0].closePath()
-                ctx[0].fillStyle = `color-mix(in srgb, ${color[c]} 25%, white)`
+                ctx[0].fillStyle = `color-mix(in srgb, ${color} 25%, white)`
                 ctx[0].fill()
 			}
-            drawing = false
+            marking = false
+            erasing = false
 		})
-        controls[0].addEventListener("click", () => {
-            c = (c+1)%color.length
-            text.style.color = color[c]
-            controls[0].style.backgroundColor = color[c]
-            controls[0].blur()
-        })
-        controls[1].addEventListener("click", () => {
-            dm = (dm+1)%drawmode.length
-            controls[1].innerHTML = drawmode[dm]
-            controls[1].blur()
-        })
 	</script>
 </html>
