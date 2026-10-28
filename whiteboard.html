@@ -41,10 +41,8 @@
 		var xym = [0, 0] // set on mousemove
 		var texthistory = ""
         var lastarrowup = Date.now()
-        var lastclick = Date.now()
-        var marking = false
-        var erasing = false
         var color = "black"
+        var marking = false
 
         // initiation
         function resize() {
@@ -52,8 +50,8 @@
             canvas[0].style.width = WIDTH+"px"; canvas[1].style.width = WIDTH+"px"
 			HEIGHT = body.clientHeight; canvas[0].height = HEIGHT; canvas[1].height = HEIGHT
 			canvas[0].style.height = HEIGHT+"px"; canvas[1].style.height = HEIGHT+"px"
-			ctx[1].lineCap = "round"
-			ctx[1].lineJoin = "round"
+			ctx[0].lineCap = "round"; ctx[1].lineCap = "round"
+			ctx[0].lineJoin = "round"; ctx[1].lineJoin = "round"
         }		
         window.addEventListener("load", resize)
         window.addEventListener("resize", resize)
@@ -62,8 +60,6 @@
             b.addEventListener("click", (e) => {
                 color = getComputedStyle(e.target).backgroundColor
                 text.style.color = color
-                ctx[1].strokeStyle = color
-                ctx[0].fillStyle = `color-mix(in srgb, ${color} 25%, white)`
                 e.target.blur()
             })
         })
@@ -107,38 +103,34 @@
 		})
 		
 		// draw, highlight, erase
-        window.addEventListener("wheel", () => {
-            body.style.cursor = (body.style.cursor == "text") ? "crosshair" : "text"
+        window.addEventListener("wheel", (e) => {
+            const c = ["crosshair", "text", "grab"]
+            body.style.cursor = c[(c.indexOf(body.style.cursor)+Math.sign(e.deltaY)+c.length)%c.length]
         })
 		canvas[1].addEventListener("mousedown", (e) => {
 			xyd = [e.clientX, e.clientY]
-            if (Date.now()-lastclick > 200) {
-                marking = true
-                ctx[0].globalCompositeOperation = "source-over"
-                ctx[0].lineWidth = 2
-                ctx[1].globalCompositeOperation = "source-over"
-                ctx[1].lineWidth = 2
-                //ctx[1].strokeStyle = color
+            if (body.style.cursor == "grab") {
+                ctx[0].globalCompositeOperation = "destination-out"; ctx[0].lineWidth = 32
+                ctx[1].globalCompositeOperation = "destination-out"; ctx[1].lineWidth = 32
             } else {
-                erasing = true
-                ctx[0].globalCompositeOperation = "destination-out"
-                ctx[0].lineWidth = 32
-                ctx[1].globalCompositeOperation = "destination-out"
-                ctx[1].lineWidth = 32
+                ctx[0].globalCompositeOperation = "source-over"; ctx[0].lineWidth = 2
+                ctx[1].globalCompositeOperation = "source-over"; ctx[1].lineWidth = 2
             }
-            lastclick = Date.now()
+            marking = true
 		})
 		canvas[1].addEventListener("mousemove", (e) => {
 			xym = [e.clientX, e.clientY]
 			text.style.left = xym[0]-1; text.style.top = xym[1]-10
-            if (marking && body.style.cursor == "crosshair" || erasing) {
+            if (marking && body.style.cursor != "text") {
                 ctx[0].beginPath()
                 ctx[0].moveTo(xym[0], xym[1])
                 ctx[0].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
+                ctx[0].strokeStyle = color
 				ctx[0].stroke()
                 ctx[1].beginPath()
                 ctx[1].moveTo(xym[0], xym[1])
                 ctx[1].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
+                ctx[1].strokeStyle = color
 				ctx[1].stroke()
 			}
 		})
@@ -154,7 +146,6 @@
                 ctx[0].fill()
 			}
             marking = false
-            erasing = false
 		})
 	</script>
 </html>
