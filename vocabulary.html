@@ -3,7 +3,7 @@
 <style>
 	* {margin: 0; font-family: sans-serif;}
     body {
-        display: grid; grid-template-rows: repeat(5, auto) 1fr auto; grid-gap: 16px;
+        display: grid; grid-template-rows: repeat(5, auto) 1fr auto auto; grid-gap: 16px;
         margin: 16px; width: calc(100vw - 32px); height: calc(100vh - 32px);
         justify-items: center; background: black;
     }
@@ -30,6 +30,7 @@
     #synonyms {font-size: 24px; color: palegreen;}
     #description {font-size: 20px; color: sandybrown; margin-top: 3px;}
     #keys {grid-row: 7; font-size: 14px; font-style: italic; color: #666}
+    #timer {grid-row: 8; font-size: 14px; color: #666}
 </style>
 <body>
     <input type="file" accept=".xlsx, .xls, .ods">
@@ -38,7 +39,8 @@
     <p id="word"></p>
     <p id="synonyms"></p>
     <p id="description"></p>
-    <p id="keys">W ⬆&ensp;remove card<br>A ⬅&ensp;speak word&emsp;S ⬇&ensp;disable card&emsp;D ➡&ensp;show/keep card<br>Click and drag cards to enable/disable</p>
+    <p id="keys">W ⬆&ensp;remove card<br>A ⬅&ensp;speak word&emsp;S ⬇&ensp;disable card&emsp;D ➡&ensp;show/keep card<br>Click and drag cards to enable/disable<br>Control key to reset timer</p>
+    <p id="timer">00:00</p>
 </body>
 <script src="xlsx.full.min.js"></script>
 <script>
@@ -52,6 +54,7 @@
     const synonyms = document.querySelector("#synonyms")
     const description = document.querySelector("#description")
     const controls = document.querySelectorAll("#controls p")
+    const timer = document.querySelector("#timer")
 
     // add words to deck
     inputs[0].addEventListener("change", (e1) => { // add words
@@ -116,6 +119,16 @@
         XLSX.writeFile(wb, "vocabulary_subgroup.ods", {bookType: "ods"})
     })
 
+    // timer
+    var time = 0
+    var timeout = null
+    function tick() {
+        time++
+        timer.innerHTML = String(Math.floor(time/60)).padStart(2, "0")+":"+String(time%60).padStart(2, "0")
+        timeout = setTimeout(tick, 1000)
+    }
+    tick()
+
     // operation
     function cycle() {
         let c = [...deck.querySelectorAll(":scope > :not(.disabled, .removed)")]
@@ -146,6 +159,12 @@
         else if (e.code == "KeyS" || e.key == "ArrowDown") {active.classList.add("disabled"); cycle()}
         else if (e.code == "KeyW" || e.key == "ArrowUp") {active.classList.add("removed"); cycle()}
         else if (e.code == "KeyA" || e.key == "ArrowLeft") {speechSynthesis.cancel(); speechSynthesis.speak(audio)}
+        else if (e.key == "Control") {
+            clearTimeout(timeout)
+            time = 0
+            timer.innerHTML = "00:00"
+            timeout = setTimeout(tick, 1000)
+        }
     })
 </script>
 </html>
