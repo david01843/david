@@ -20,12 +20,13 @@
             button:nth-child(2) {background: green}
             button:nth-child(3) {background: orange}
             button:nth-child(4) {background: crimson}
+            #buttons a {padding-left: 4px; color: blue; cursor: pointer;}
 		</style>
 	</head>
 	<body>
         <canvas></canvas><canvas></canvas>
         <p id="text"></p>
-        <div id="buttons"><button></button><button></button><button></button><button></button></div>
+        <div id="buttons"><button></button><button></button><button></button><button></button><a>save</a</div>
     </body>
     <script src="html2canvas.min.js"></script>
 	<script>
@@ -36,6 +37,7 @@
 		const ctx = [canvas[0].getContext("2d"), canvas[1].getContext("2d")]
 		const text = document.querySelector("#text")
         const buttons = document.querySelectorAll("button")
+        const save = document.querySelector("#buttons a")
         
 		var xyd = [0, 0] // set on mousedown
 		var xym = [0, 0] // set on mousemove
@@ -149,21 +151,19 @@
 		})
    
         // screenshot
-        window.addEventListener("keydown", (e) => {
-            if (e.key == "Control") {
-                const c = document.createElement("canvas")
-                c.width = canvas[0].width
-                c.height = canvas[0].height
-                const x = c.getContext("2d")
-                x.fillStyle = "#fff"
-                x.fillRect(0, 0, c.width, c.height)
-                x.drawImage(canvas[0], 0, 0)
-                x.drawImage(canvas[1], 0, 0)
-                const a = document.createElement("a")
-                a.download = "whiteboard_screenshot.jpg"
-                a.href = c.toDataURL("image/jpeg")
-                a.click()
-            }
+        save.addEventListener("click", () => {
+            const c = document.createElement("canvas")
+            c.width = canvas[0].width
+            c.height = canvas[0].height
+            const x = c.getContext("2d")
+            x.fillStyle = "#fff"
+            x.fillRect(0, 0, c.width, c.height)
+            x.drawImage(canvas[0], 0, 0)
+            x.drawImage(canvas[1], 0, 0)
+            const a = document.createElement("a")
+            a.download = "whiteboard_screenshot.jpg"
+            a.href = c.toDataURL("image/jpeg")
+            a.click()
         })
 	</script>
 </html>
