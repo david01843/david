@@ -147,5 +147,23 @@
 			}
             marking = false
 		})
+   
+        // screenshot
+        window.addEventListener("keydown", (e) => {
+            if (e.key == "Control") {
+                const c = document.createElement("canvas")
+                c.width = canvas[0].width
+                c.height = canvas[0].height
+                const x = c.getContext("2d")
+                x.fillStyle = "#fff"
+                x.fillRect(0, 0, c.width, c.height)
+                x.drawImage(canvas[0], 0, 0)
+                x.drawImage(canvas[1], 0, 0)
+                const a = document.createElement("a")
+                a.download = "whiteboard_screenshot.jpg"
+                a.href = c.toDataURL("image/jpeg")
+                a.click()
+            }
+        })
 	</script>
 </html>
