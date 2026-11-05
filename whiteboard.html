@@ -2,156 +2,103 @@
 	<head>
 		<meta charset="UTF-8" name="google" content="notranslate">
 		<style>
-			* {margin: 0; user-select: none;}
-			body {position: relative; overflow: hidden;}
-			canvas {position: absolute; top: 0; left: 0; width: 100%; height: 100%;}
-			canvas:nth-child(1) {z-index: 1;}
-			canvas:nth-child(2) {z-index: 2;}
-			#text {
-                position: absolute; z-index: 3; max-width: 384px;
-                font-family: sans-serif; font-size: 18px; white-space: pre-wrap;
-            }
-            #buttons {
-                position: absolute; left: 50%; transform: translateX(-50%);
-                z-index: 4; display: flex;
-            }
-            button {height: 20px; width: 24px;}
-            button:nth-child(1) {background: black}
-            button:nth-child(2) {background: green}
-            button:nth-child(3) {background: orange}
-            button:nth-child(4) {background: crimson}
-            #buttons a {padding-left: 4px; color: blue; cursor: pointer;}
+			* {margin: 0; user-select: none; font-family: sans-serif; font-size: 18px;}
+			body {position: relative; display: flex; flex-direction: column; overflow: hidden; height: 100%;}
+            #control {flex: 0 0 20px; display: flex; justify-content: center; background: gainsboro;}
+            #control button {width: 28px; height: 20px;}
+            #control a {padding-left: 16px; color: blue; cursor: pointer; line-height: 20px;}
+            #canvas {position: relative; flex: 1 1 auto;}
+            #canvas canvas {position: absolute; top: 0; left: 0; width: 100%; height: 100%;}
+            #canvas canvas:nth-of-type(2) {z-index: 1;}
+            #text {position: absolute; display: none; width: 384px;}
+            img {position: absolute; display: none; border: 1px solid green;}
 		</style>
 	</head>
 	<body>
-        <canvas></canvas><canvas></canvas>
-        <p id="text"></p>
-        <div id="buttons"><button></button><button></button><button></button><button></button><a>save</a</div>
+        <div id="control">
+            <button style="background: black;"></button>
+            <button style="background: whitesmoke;"></button>
+            <button style="background: green;"></button>
+            <button style="background: orange;"></button>
+            <button style="background: crimson;"></button>
+            <a>last</a><a>paste</a><a>translate</a><a>save</a>
+        </div>
+        <div id="canvas"><canvas></canvas><canvas></canvas></div>
+        <div id="text"><p></p><p></p></div>
+        <img>
     </body>
-    <script src="html2canvas.min.js"></script>
+    <script src="snapdom.js"></script>
 	<script>
-		// variables
-        var WIDTH, HEIGHT
-		const body = document.querySelector("body")
-		const canvas = document.querySelectorAll("canvas")
-		const ctx = [canvas[0].getContext("2d"), canvas[1].getContext("2d")]
-		const text = document.querySelector("#text")
-        const buttons = document.querySelectorAll("button")
-        const save = document.querySelector("#buttons a")
-        
-		var xyd = [0, 0] // set on mousedown
-		var xym = [0, 0] // set on mousemove
-		var texthistory = ""
-        var lastarrowup = Date.now()
+        const body = document.querySelector("body")
+        const buttons = document.querySelectorAll("#control button")
+        const as = document.querySelectorAll("#control a")
+        const canvas = document.querySelectorAll("#canvas canvas")
+        const ctx = [canvas[0].getContext("2d"), canvas[1].getContext("2d")]
+        const text = document.querySelector("#text")
+        const ps = text.querySelectorAll("p")
+        const img = document.querySelector("img")
+
+        var lasttext = ""
         var color = "black"
         var marking = false
+        var mark0 = [0, 0]
 
-        // initiation
-        function resize() {
-            WIDTH = body.clientWidth; canvas[0].width = WIDTH; canvas[1].width = WIDTH
-            canvas[0].style.width = WIDTH+"px"; canvas[1].style.width = WIDTH+"px"
-			HEIGHT = body.clientHeight; canvas[0].height = HEIGHT; canvas[1].height = HEIGHT
-			canvas[0].style.height = HEIGHT+"px"; canvas[1].style.height = HEIGHT+"px"
-			ctx[0].lineCap = "round"; ctx[1].lineCap = "round"
-			ctx[0].lineJoin = "round"; ctx[1].lineJoin = "round"
-        }		
-        window.addEventListener("load", resize)
-        window.addEventListener("resize", resize)
+        // init
         body.style.cursor = "crosshair"
+        var bcr = canvas[0].getBoundingClientRect()
+        canvas[0].width = bcr.width; canvas[0].style.width = bcr.width+"px"
+        canvas[0].height = bcr.height; canvas[0].style.height = bcr.height+"px"
+        canvas[1].width = bcr.width; canvas[1].style.width = bcr.width+"px"
+        canvas[1].height = bcr.height; canvas[1].style.height = bcr.height+"px"
+
+        // controls
         buttons.forEach(b => {
             b.addEventListener("click", (e) => {
                 color = getComputedStyle(e.target).backgroundColor
-                text.style.color = color
+                ps[0].style.color = color
+                ps[1].style.color = color
                 e.target.blur()
             })
         })
-		
-		// typing
-		async function translate(t) {
+        as[0].addEventListener("click", () => {
+            ps[0].textContent = lasttext
+            ps[1].textContent = ""
+            text.style.display = "block"
+        })
+        as[1].addEventListener("click", async () => {
+            const d = await navigator.clipboard.read()
+            const t = d[0].types[0]
+            if (t.startsWith("text")) {
+                ps[0].textContent = await (await d[0].getType(t)).text()
+                ps[1].textContent = ""
+                text.style.display = "block"
+            }
+            else if (t.startsWith("image")) {
+                const blob = await d[0].getType(t)
+                const url = URL.createObjectURL(blob)
+                const i = new Image()
+                i.onload = () => {
+                    img.src = url
+                    img.style.width = i.naturalWidth
+                    img.style.height = i.naturalHeight
+                    img.style.display = "block"
+                }
+                i.src = url
+            }
+        })
+        as[2].addEventListener("click", async () => {
 			let x = 0
-			for (let i of t.toLowerCase()) {x += 1*(/^[a-z]$/.test(i)); x -= 1*(/^[а-яё]$/.test(i))}
+			for (let l of ps[0].textContent.toLowerCase()) {
+                x += 1*(/^[a-z]$/.test(l))
+                x -= 1*(/^[а-яё]$/.test(l))
+            }
             if (x > 0) x = "translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q="
             else x = "translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q="
-			x = await fetch("https://translate.googleapis.com/"+x+encodeURIComponent(t))
+			x = await fetch("https://translate.googleapis.com/"+x+encodeURIComponent(ps[0].textContent))
 			x = await x.json()
-			return x[0].map(y => y[0]).join("")
-		}
-		async function drawtext(t) {
-            texthistory = text.innerHTML
-            const x = xym[0], y = xym[1]
-            const h = text.getBoundingClientRect().height
-            let img = await html2canvas(text, {backgroundColor: null})
-            ctx[1].drawImage(img, x-1, y-11)
-            if (t) {
-                text.innerHTML = await translate(text.innerHTML)
-                img = await html2canvas(text, {backgroundColor: null})
-                ctx[1].drawImage(img, x-1, y+h-12)
-            }
-		}
-		window.addEventListener("keydown", async (e) => {
-            if (e.key.length == 1) {
-                text.innerHTML += e.key
-            } else if (e.key == "Backspace") {
-				text.innerHTML = text.innerHTML.slice(0, -1)
-			} else if (e.key == "Enter") {
-				if (text.innerHTML) await drawtext(e.shiftKey)
-                text.innerHTML = ""
-			} else if (e.key == "Escape") {
-                text.innerHTML = ""
-            } else if (e.key == "ArrowUp") {
-                text.textContent = (Date.now()-lastarrowup < 200) ? await navigator.clipboard.readText() : texthistory
-                lastarrowup = Date.now()
-			}
-		})
-		
-		// draw, highlight, erase
-        window.addEventListener("wheel", (e) => {
-            const c = ["crosshair", "text", "grab"]
-            body.style.cursor = c[(c.indexOf(body.style.cursor)+Math.sign(e.deltaY)+c.length)%c.length]
+			ps[1].textContent = x[0].map(y => y[0]).join("")
         })
-		canvas[1].addEventListener("mousedown", (e) => {
-			xyd = [e.clientX, e.clientY]
-            if (body.style.cursor == "grab") {
-                ctx[0].globalCompositeOperation = "destination-out"; ctx[0].lineWidth = 32
-                ctx[1].globalCompositeOperation = "destination-out"; ctx[1].lineWidth = 32
-            } else {
-                ctx[0].globalCompositeOperation = "source-over"; ctx[0].lineWidth = 2
-                ctx[1].globalCompositeOperation = "source-over"; ctx[1].lineWidth = 2
-            }
-            marking = true
-		})
-		canvas[1].addEventListener("mousemove", (e) => {
-			xym = [e.clientX, e.clientY]
-			text.style.left = xym[0]-1; text.style.top = xym[1]-10
-            if (marking && body.style.cursor != "text") {
-                ctx[0].beginPath()
-                ctx[0].moveTo(xym[0], xym[1])
-                ctx[0].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
-                ctx[0].strokeStyle = color
-				ctx[0].stroke()
-                ctx[1].beginPath()
-                ctx[1].moveTo(xym[0], xym[1])
-                ctx[1].lineTo(xym[0]-e.movementX, xym[1]-e.movementY)
-                ctx[1].strokeStyle = color
-				ctx[1].stroke()
-			}
-		})
-		canvas[1].addEventListener("mouseup", () => {
-			if (marking && body.style.cursor == "text") {
-				ctx[0].beginPath()
-                ctx[0].moveTo(xyd[0]-2, xyd[1]-8)
-                ctx[0].lineTo(xym[0]+2, xym[1]-8)
-                ctx[0].lineTo(xym[0]+2, xym[1]+8)
-                ctx[0].lineTo(xyd[0]-2, xyd[1]+8)
-				ctx[0].closePath()
-                ctx[0].fillStyle = `color-mix(in srgb, ${color} 25%, white)`
-                ctx[0].fill()
-			}
-            marking = false
-		})
-   
-        // screenshot
-        save.addEventListener("click", () => {
+        as[3].addEventListener("click", () => {
             const c = document.createElement("canvas")
             c.width = canvas[0].width
             c.height = canvas[0].height
@@ -161,9 +108,90 @@
             x.drawImage(canvas[0], 0, 0)
             x.drawImage(canvas[1], 0, 0)
             const a = document.createElement("a")
-            a.download = "whiteboard_screenshot.jpg"
-            a.href = c.toDataURL("image/jpeg")
+            a.download = "whiteboard_save.png"
+            a.href = c.toDataURL("image/png")
             a.click()
         })
+
+        // mouse events
+		canvas[1].addEventListener("mousedown", async (e) => {
+            if (text.style.display == "block") {
+                const png = await snapdom.toPng(text)
+                ctx[1].globalCompositeOperation = "source-over"
+                ctx[1].drawImage(png, e.clientX, e.clientY-20)
+                lasttext = ps[0].textContent
+                text.style.display = "none"
+                ps[0].textContent = ""
+                ps[1].textContent = ""
+            } else if (img.style.display == "block") {
+                ctx[0].globalCompositeOperation = "source-over"
+                ctx[0].drawImage(img, e.clientX, e.clientY-20)
+                img.style.display = "none"
+            } else marking = true
+            mark0 = [e.offsetX, e.offsetY]
+		})
+		canvas[1].addEventListener("mousemove", (e) => {
+            text.style.left = e.clientX; text.style.top = e.clientY
+            img.style.left = e.clientX; img.style.top = e.clientY
+            if (marking && body.style.cursor == "crosshair") {
+                ctx[1].lineCap = "round"; ctx[1].lineJoin = "round"; ctx[1].lineWidth = 2
+                ctx[1].globalCompositeOperation = "source-over"
+                ctx[1].beginPath()
+                ctx[1].moveTo(e.offsetX-e.movementX, e.offsetY-e.movementY)
+                ctx[1].lineTo(e.offsetX, e.offsetY)
+                ctx[1].strokeStyle = color
+				ctx[1].stroke()
+            } else if (marking && body.style.cursor == "grab") {
+                ctx[0].lineCap = "round"; ctx[0].lineJoin = "round"; ctx[0].lineWidth = 32
+                ctx[0].globalCompositeOperation = "destination-out"
+                ctx[0].beginPath()
+                ctx[0].moveTo(e.offsetX-e.movementX, e.offsetY-e.movementY)
+                ctx[0].lineTo(e.offsetX, e.offsetY)
+                ctx[0].strokeStyle = color
+				ctx[0].stroke()
+                ctx[1].lineCap = "round"; ctx[1].lineJoin = "round"; ctx[1].lineWidth = 32
+                ctx[1].globalCompositeOperation = "destination-out"
+                ctx[1].beginPath()
+                ctx[1].moveTo(e.offsetX-e.movementX, e.offsetY-e.movementY)
+                ctx[1].lineTo(e.offsetX, e.offsetY)
+                ctx[1].strokeStyle = color
+				ctx[1].stroke()
+			}
+		})
+		canvas[1].addEventListener("mouseup", (e) => {
+			if (marking && body.style.cursor == "text") {
+                ctx[0].lineCap = "square"; ctx[0].lineJoin = "square"; ctx[0].lineWidth = 16
+                ctx[0].globalCompositeOperation = "source-over"
+				ctx[0].beginPath()
+                ctx[0].moveTo(mark0[0], mark0[1])
+                ctx[0].lineTo(e.offsetX, e.offsetY)
+                ctx[0].strokeStyle = `color-mix(in srgb, ${color} 25%, white)`
+				ctx[0].stroke()
+			}
+            marking = false
+		})
+        window.addEventListener("wheel", (e) => {
+            const c = ["crosshair", "text", "grab"]
+            body.style.cursor = c[(c.indexOf(body.style.cursor)+Math.sign(e.deltaY)+c.length)%c.length]
+            if (img.style.display == "block") {
+                bcr = img.getBoundingClientRect()
+                img.style.width = bcr.width*(1+e.deltaY/1000)
+                img.style.height = bcr.height*(1+e.deltaY/1000)
+            }
+        })
+
+        // key events
+        window.addEventListener("keydown", async (e) => {
+            if (e.key.length == 1) {
+                text.style.display = "block"
+                ps[0].textContent += e.key
+            } else if (e.key == "Backspace") {
+				ps[0].textContent = ps[0].textContent.slice(0, -1)
+			} else if (e.key == "Escape") {
+                text.style.display = "none"
+                ps[0].textContent = ""
+                ps[1].textContent = ""
+            }
+		})
 	</script>
 </html>
