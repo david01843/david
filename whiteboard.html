@@ -11,6 +11,7 @@
             #canvas canvas {position: absolute; top: 0; left: 0; width: 100%; height: 100%;}
             #canvas canvas:nth-of-type(2) {z-index: 1;}
             #text {position: absolute; display: none; width: 1024px; overflow: hidden;}
+            p {line-height: 48px;}
             img {position: absolute; display: none;}
 		</style>
 	</head>
@@ -125,7 +126,8 @@
                 ps[1].textContent = ""
             } else if (img.style.display == "block") {
                 ctx[0].globalCompositeOperation = "source-over"
-                ctx[0].drawImage(img, e.clientX, e.clientY-24)
+                bcr = img.getBoundingClientRect()
+                ctx[0].drawImage(img, e.clientX, e.clientY-24, bcr.width, bcr.height)
                 img.style.display = "none"
             } else marking = true
             mark0 = [e.offsetX, e.offsetY]
