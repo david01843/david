@@ -10,7 +10,7 @@
             #canvas {position: relative; flex: 1 1 auto;}
             #canvas canvas {position: absolute; top: 0; left: 0; width: 100%; height: 100%;}
             #canvas canvas:nth-of-type(2) {z-index: 1;}
-            #text {position: absolute; display: none; width: 1024px; overflow: hidden;}
+            #text {position: absolute; display: none; width: 1024px; overflow: hidden; white-space: pre-wrap;}
             p {line-height: 48px;}
             img {position: absolute; display: none;}
 		</style>
@@ -72,6 +72,7 @@
             if (t.startsWith("text")) {
                 ps[0].textContent = await (await d[0].getType(t)).text()
                 ps[1].textContent = ""
+                text.style.width = "1024px"
                 text.style.display = "block"
             }
             else if (t.startsWith("image")) {
@@ -175,10 +176,15 @@
         window.addEventListener("wheel", (e) => {
             const c = ["crosshair", "text", "grab"]
             body.style.cursor = c[(c.indexOf(body.style.cursor)+Math.sign(e.deltaY)+c.length)%c.length]
-            if (img.style.display == "block") {
+            if (text.style.display == "block") {
+                text.style.width = (parseFloat(text.style.width)+e.deltaY/2)+"px"
+            } else if (img.style.display == "block") {
                 bcr = img.getBoundingClientRect()
                 img.style.width = bcr.width*(1+e.deltaY/1000)
                 img.style.height = bcr.height*(1+e.deltaY/1000)
+            } else {
+                const c = ["crosshair", "text", "grab"]
+                body.style.cursor = c[(c.indexOf(body.style.cursor)+Math.sign(e.deltaY)+c.length)%c.length]
             }
         })
 
