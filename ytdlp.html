@@ -10,6 +10,7 @@
 	</style>
 	<body>
         <a>(1st url) List formats, pick, download, move</a>
+        <a>(1st url) Download English subtitles</a>
         <a>(all urls) Download 251/140, move</a>
         <a>Move</a>
         <a>(laptop) Convert</a>
@@ -35,16 +36,21 @@
             let cmd = `yt-dlp --cookies /sdcard/Download/cookies.txt -F "${url}" && read -p "Pick: " x && yt-dlp --cookies /sdcard/Download/cookies.txt -f "$x" "${url}"; mv *.webm *.m4a *.mp4 /sdcard/Download/`
             navigator.clipboard.writeText(cmd)
         })
-        a[1].addEventListener("click", (e) => {
+        a[1].addEventListener("click", () => {
+            let url = document.querySelector("p").innerHTML
+            let cmd = `yt-dlp --write-auto-subs --sub-langs en --skip-download "${url}"; mv *.vtt /sdcard/Download/`
+            navigator.clipboard.writeText(cmd)
+        })
+        a[2].addEventListener("click", (e) => {
             let urls = [...document.querySelectorAll("p")].map(p => `"${p.innerHTML}"`).join(" ")
             let cmd = `for i in ${urls}; do yt-dlp --cookies /sdcard/Download/cookies.txt -f "251/140" "$i"; done; mv *.webm *.m4a *.mp4 /sdcard/Download/`
             navigator.clipboard.writeText(cmd)
         })
-        a[2].addEventListener("click", (e) => {
+        a[3].addEventListener("click", (e) => {
             let cmd = "mv *.webm *.m4a *.mp4 /sdcard/Download/"
             navigator.clipboard.writeText(cmd)
         })
-        a[3].addEventListener("click", (e) => {
+        a[4].addEventListener("click", (e) => {
             let cmd = 'cd /home/david/Desktop/music/; for f in *.webm *.m4a *.mp4; do ffmpeg -i "$f" "${f%.*}.mp3" -loglevel quiet; done'
             navigator.clipboard.writeText(cmd)
         })
