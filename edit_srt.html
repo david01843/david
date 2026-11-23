@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<style>
+    * {margin: 0; user-select: none;}
+    body {margin: 4px;}
+    h4 {font-size: 12px; font-weight: normal;}
+    video {display: none; width: 512px; border: 1px solid black;}
+    p {display: none; font-size: 2em;}
+    input:nth-of-type(2) {display: none;}
+    textarea {display: none; width: 512px; height: 512px;}
+    button {display: none; margin-top: 4px;}
+</style>
+<body>
+    <h4>00:00:00,000 -> 00:00:00,000 00:00:00,000 # edit example<br>At minimum, first and last subtitles need edits.<br>Click and drag = seek slow, CTRL = play/pause</h4>
+    <input type="file" accept=".mp4">
+    <video controls></video>
+    <p>00:00:00,000</p>
+    <input type="file" accept=".srt">
+    <textarea></textarea>
+    <button>Export</button>
+    <script>
+        const inputs = document.querySelectorAll("input")
+        const video = document.querySelector("video")
+        const p = document.querySelector("p")
+        const textarea = document.querySelector("textarea")
+        const button = document.querySelector("button")
+        inputs[0].addEventListener("change", (e) => {
+            const file = e.target.files[0]
+            const url = URL.createObjectURL(file)
+            video.src = url
+            video.load()
+            video.style.display = "block"
+            video.addEventListener("loadeddata", () => {
+                video.requestVideoFrameCallback(onframe)
+            })
+            p.style.display = "block"
+            inputs[1].style.display = "block"
+            inputs[0].style.display = "none"
+        })
+        inputs[1].addEventListener("change", (e) => {
+            textarea.style.display = "block"
+            button.style.display = "block"
+            const file = e.target.files[0]
+            const reader = new FileReader()
+            reader.onload = (r) => textarea.value += r.target.result
+            reader.readAsText(file, "utf-8") // utf-8 windows-1251 koi8-r iso-8859-5
+            inputs[1].style.display = "none"
+        })
+        var dragging = false
+        window.addEventListener("keydown", (e) => {
+            if (e.key == "Control") {video.paused ? video.play() : video.pause()}
+        })
+        window.addEventListener("mousedown", (e) => {dragging = true})
+        window.addEventListener("mousemove", (e) => {            
+            if (dragging) {video.currentTime += e.movementX/50}
+        })
+        window.addEventListener("mouseup", (e) => {dragging = false})
+        function num2str(n) {
+            let h = String(Math.floor(n/3600)).padStart(2, "0")
+            let m = String(Math.floor(n%3600/60)).padStart(2, "0")
+            let s = String(Math.floor(n%60)).padStart(2, "0")
+            let ms = String(Math.floor(1000*n%1000)).padStart(3, "0")
+            return `${h}:${m}:${s},${ms}`
+        }
+        function str2num(s) {
+            let t = s.split(/[:,]/).map(Number)
+            return 3600*t[0]+60*t[1]+t[2]+t[3]/1000
+        }
+        function onframe(now, metadata) {
+            p.innerHTML = num2str(video.currentTime)
+	        video.requestVideoFrameCallback(onframe)
+        }
+        function timestamps(x) {return x.match(/\d{2}:\d{2}:\d{2},\d{3}/g) || []}
+        button.addEventListener("click", () => {
+            let lines = textarea.value.split("\n")
+            let oldtimes = []
+            let newtimes = []
+            lines.forEach((i) => {
+                let ts = timestamps(i)
+                if (ts.length == 3) {
+                    oldtimes.push(str2num(ts[0]))
+                    newtimes.push(str2num(ts[2]))
+                }
+            })
+            let n = 0, t1 = 0, t2 = 0
+            let firststamp = true
+            lines = lines.map((i) => {
+                let ts = timestamps(i)
+                if (ts.length >= 2) {
+                    let ratio = (newtimes[n]-newtimes[n+1])/(oldtimes[n]-oldtimes[n+1])
+                    t1 = newtimes[n]+(str2num(ts[0])-oldtimes[n])*ratio
+                    t2 = str2num(ts[1])-str2num(ts[0])+t1
+                    if (ts.length == 3) {
+                        if (!firststamp) n += 1
+                        firststamp = false
+                    }
+                    return `${num2str(t1)} --> ${num2str(t2)}`
+                }
+                return i
+            })
+            const blob = new Blob(["\uFEFF" + lines.join("\n")], {type: "text/plain;charset=utf-8"})
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = "adjusted_subtitles.srt"
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+        })
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
