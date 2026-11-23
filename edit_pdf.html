@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {margin: 0; padding: 0;}
+        main {height: 100%; width: 60%; float: left;}
+        #second {width: 40%; background-color: gainsboro;}
+        object {height: 100vh;}
+        button {margin-top: 20px;}
+    </style>
+</head>
+<body>
+    <main id="first">
+        <button>Add an input</button>
+        <button>Delete last input</button>
+        <button>Compile PDF</button>
+        <div><input type="file" accept=".pdf, .jpg, .png"/><textarea placeholder="ex: 1, 6-18, empty"></textarea></div>
+    </main>
+    <main id="second">
+        <div><object type="application/pdf"></object></div>
+    </main>
+    <script src="pdf-lib.min.js"></script>
+    <script>
+        var b = document.querySelectorAll("button")
+        var first = document.querySelector("#first")
+        var div = document.querySelector("div").cloneNode(true)
+        var input = document.querySelector("input")
+        
+        input.addEventListener("change", async (e) => {
+            const file = e.target.files[0]
+            if (file.type == "application/pdf") {
+                const arrayBuffer = await file.arrayBuffer()
+                const doc = await PDFLib.PDFDocument.load(arrayBuffer)
+            } else {
+                const doc = await PDFLib.PDFDocument.create()
+                const imageBytes = await file.arrayBuffer()
+                let image
+                if (file.type.includes('jpeg')) {
+                    image = await doc.embedJpg(imageBytes)
+                } else if (file.type.includes('png')) {
+                    image = await doc.embedPng(imageBytes)
+                }
+                
+                // Calculate dimensions while maintaining aspect ratio
+                const pageWidth = 550
+                const pageHeight = 750
+                const imageAspectRatio = image.width / image.height
+                const pageAspectRatio = pageWidth / pageHeight
+                
+                let width, height
+                if (imageAspectRatio > pageAspectRatio) {
+                    // Image is wider than page (relative to height)
+                    width = pageWidth
+                    height = pageWidth / imageAspectRatio
+                } else {
+                    // Image is taller than page (relative to width)
+                    height = pageHeight
+                    width = pageHeight * imageAspectRatio
+                }
+                
+                // Center the image on the page
+                const x = (pageWidth - width) / 2
+                const y = (pageHeight - height) / 2
+                
+                const page = doc.addPage([pageWidth, pageHeight])
+                page.drawImage(image, {
+                    x,
+                    y,
+                    width,
+                    height,
+                })
+            }
+        })
+        
+        b[0].addEventListener("click", () => {
+            d = div.cloneNode(true)
+            first.appendChild(d)
+        })
+        
+        b[1].addEventListener("click", () => {
+            var inputs = document.querySelectorAll("#first input")
+            if (inputs.length > 1) {
+                inputs[inputs.length-1].parentNode.remove()
+            }
+        })
+        
+        b[2].addEventListener("click", async () => {
+            const doc = await PDFLib.PDFDocument.create()
+            const divs = document.querySelectorAll("#first div")
+            
+            for (const div of divs) {
+                const input = div.querySelector("input")
+                const textarea = div.querySelector("textarea")
+                const pagesText = textarea.value.trim()
+                
+                if (input.files.length === 0) continue
+                
+                const file = input.files[0]
+                const arrayBuffer = await file.arrayBuffer()
+                
+                if (file.type === "application/pdf") {
+                    const srcDoc = await PDFLib.PDFDocument.load(arrayBuffer)
+                    const pageIndices = parsePageRange(pagesText, srcDoc.getPageCount())
+                    
+                    const pages = await doc.copyPages(srcDoc, pageIndices)
+                    pages.forEach(page => doc.addPage(page))
+                } else {
+                    // Handle image files (convert to single page)
+                    const srcDoc = await PDFLib.PDFDocument.create()
+                    const pageWidth = 550
+                    const pageHeight = 750
+                    const imageBytes = arrayBuffer
+                    let image
+                    
+                    if (file.type.includes('jpeg')) {
+                        image = await srcDoc.embedJpg(imageBytes)
+                    } else if (file.type.includes('png')) {
+                        image = await srcDoc.embedPng(imageBytes)
+                    }
+                    
+                    // Calculate dimensions while maintaining aspect ratio
+                    const imageAspectRatio = image.width / image.height
+                    const pageAspectRatio = pageWidth / pageHeight
+                    
+                    let width, height
+                    if (imageAspectRatio > pageAspectRatio) {
+                        width = pageWidth
+                        height = pageWidth / imageAspectRatio
+                    } else {
+                        height = pageHeight
+                        width = pageHeight * imageAspectRatio
+                    }
+                    
+                    const x = (pageWidth - width) / 2
+                    const y = (pageHeight - height) / 2
+                    
+                    const page = srcDoc.addPage([pageWidth, pageHeight])
+                    page.drawImage(image, {
+                        x,
+                        y,
+                        width,
+                        height,
+                    })
+                    
+                    const pages = await doc.copyPages(srcDoc, [0])
+                    doc.addPage(pages[0])
+                }
+            }
+            
+            const pdfBytes = await doc.save()
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+            const url = URL.createObjectURL(blob)
+            document.querySelector("#second object").data = url
+        })
+        
+        function parsePageRange(rangeText, maxPages) {
+            if (!rangeText) return Array.from({length: maxPages}, (_, i) => i)
+            
+            const parts = rangeText.split(',')
+            const pages = new Set()
+            
+            for (const part of parts) {
+                const trimmed = part.trim()
+                if (trimmed.includes('-')) {
+                    const [start, end] = trimmed.split('-').map(Number)
+                    const realStart = Math.max(1, Math.min(start, maxPages))
+                    const realEnd = Math.max(1, Math.min(end || start, maxPages))
+                    
+                    for (let i = realStart; i <= realEnd; i++) {
+                        pages.add(i - 1) // Convert to 0-based index
+                    }
+                } else if (trimmed) {
+                    const num = parseInt(trimmed)
+                    if (!isNaN(num) && num > 0 && num <= maxPages) {
+                        pages.add(num - 1) // Convert to 0-based index
+                    }
+                }
+            }
+            
+            return Array.from(pages).sort((a, b) => a - b)
+        }
+    </script>
+</body>
+</html>

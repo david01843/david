@@ -1,0 +1,43 @@
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" name="google" content="notranslate">
+	</head>
+    <style>
+        * {margin: 0; cursor: crosshair;}
+        p {position: fixed; font-size: 12px; background: white; padding: 0 4px;}
+    </style>
+	<body>
+		<input type="file" accept="image/*">
+	</body>
+	<script>
+		const input = document.querySelector("input")
+		const p = document.createElement("p")
+		const canvas = document.createElement("canvas")
+		const ctx = canvas.getContext("2d")
+		input.addEventListener("change", (e) => {
+			const file = e.target.files[0]
+			const img = new Image()
+			img.src = URL.createObjectURL(file)
+			img.onload = () => {
+				canvas.width = img.naturalWidth
+				canvas.height = img.naturalHeight
+				ctx.drawImage(img, 0, 0)
+				document.body.appendChild(canvas)
+				document.body.appendChild(p)
+				input.remove()
+			}
+		})
+		canvas.addEventListener("click", (e) => {
+			const rect = canvas.getBoundingClientRect()
+			const x = Math.round(e.clientX-rect.left)
+			const y = Math.round(e.clientY-rect.top)
+			const pixel = ctx.getImageData(x, y, 1, 1).data
+			const h = pixel[0].toString(16).padStart(2, '0')+pixel[1].toString(16).padStart(2, '0')+pixel[2].toString(16).padStart(2, '0')
+			p.innerHTML = `xy ${x},${y} rgb ${pixel[0]},${pixel[1]},${pixel[2]} hex ${h}`
+		})
+        canvas.addEventListener("mousemove", (e) => {
+            p.style.left = e.clientX
+            p.style.top = e.clientY
+        })
+	</script>
+</html>
