@@ -28,16 +28,14 @@
 			}
 		})
 		canvas.addEventListener("click", (e) => {
-			const rect = canvas.getBoundingClientRect()
-			const x = Math.round(e.clientX-rect.left)
-			const y = Math.round(e.clientY-rect.top)
-			const pixel = ctx.getImageData(x, y, 1, 1).data
-			const h = pixel[0].toString(16).padStart(2, '0')+pixel[1].toString(16).padStart(2, '0')+pixel[2].toString(16).padStart(2, '0')
-			p.innerHTML = `xy ${x},${y} rgb ${pixel[0]},${pixel[1]},${pixel[2]} hex ${h}`
+            const rect = canvas.getBoundingClientRect()
+		    const x = Math.round(e.clientX-rect.left)
+		    const y = Math.round(e.clientY-rect.top)
+		    const pixel = ctx.getImageData(x, y, 1, 1).data
+		    const h = pixel[0].toString(16).padStart(2, '0')+pixel[1].toString(16).padStart(2, '0')+pixel[2].toString(16).padStart(2, '0')
+		    p.innerHTML = `xy ${x},${y} rgb ${pixel[0]},${pixel[1]},${pixel[2]} hex ${h}`
+            p.style.left = e.clientX-rect.left
+            p.style.top = e.clientY-rect.top
 		})
-        canvas.addEventListener("mousemove", (e) => {
-            p.style.left = e.clientX
-            p.style.top = e.clientY
-        })
 	</script>
 </html>
